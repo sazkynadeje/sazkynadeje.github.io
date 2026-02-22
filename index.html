@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v5.5</title>
+    <title>KANCELÁŘ NADĚJE v5.6</title>
 
     <meta name="apple-mobile-web-app-title" content="Naděje v2">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -40,7 +40,6 @@
         
         body { background-color: var(--dark); color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
         
-        /* ADMIN TLAČÍTKO - Viditelné jen pro vybrané v JS */
         .admin-lock { position: fixed; top: 20px; right: 20px; width: 48px; height: 48px; background: rgba(15, 23, 42, 0.9); border: 2px solid var(--neon); border-radius: 50%; display: none; align-items: center; justify-content: center; text-decoration: none; font-size: 1.3em; z-index: 9999; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); backdrop-filter: blur(10px); }
         
         .header-logo { max-width: 450px; width: 90%; margin: 20px 0 40px 0; filter: drop-shadow(0 0 10px var(--neon)); animation: neonGlow 4s ease-in-out infinite alternate; }
@@ -55,7 +54,6 @@
         .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -20px auto 30px auto; }
         .nav-btn { flex: 1; padding: 15px 5px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; text-decoration: none; color: #fff; font-size: 0.7em; font-weight: 900; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
-        /* FIX VLAJEK */
         .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); width: 90%; max-width: 450px; box-sizing: border-box; }
         .flags-wrapper { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 25px 0; flex-wrap: nowrap !important; }
         .flag-container { flex: 1; min-width: 0; }
@@ -69,6 +67,8 @@
         .fab-cart { position: fixed; bottom: 35px; right: 35px; width: 75px; height: 75px; background: var(--neon); color: var(--dark); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 2em; z-index: 5000; box-shadow: 0 15px 40px rgba(0, 242, 255, 0.4); }
         #cartModal { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 520px; background: #1e293b; border: 2px solid var(--neon); border-radius: 40px; padding: 35px; display: none; z-index: 9999; box-shadow: 0 0 100px rgba(0,0,0,0.9); max-height: 85vh; overflow-y: auto; }
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 50000; display: none; align-items: center; justify-content: center; }
+
+        .btn-download { display: block; background: #ffffff; color: #000; padding: 18px; border-radius: 20px; text-decoration: none; font-weight: 900; margin-top: 20px; font-size: 0.9em; border: none; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -125,7 +125,7 @@
             
             <img id="uiQrImage" src="" style="width:230px; background:white; padding:12px; border-radius:25px; box-shadow: 0 0 40px rgba(0,0,0,0.5);">
             
-            <div id="uiPayButtonPlace"></div>
+            <button id="btnDownloadQR" class="btn-download">📸 ULOŽIT QR KÓD</button>
 
             <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; text-align:left; margin-top:20px; border:1px solid rgba(0,242,255,0.2);">
                 <div style="font-size:0.8em; margin-bottom:5px;"><span style="opacity:0.5; text-transform:uppercase; font-weight:bold;">Účet:</span> <span style="color:var(--neon); font-weight:900;">295511827 / 0300</span></div>
@@ -133,7 +133,7 @@
                 <div style="font-size:0.8em;"><span style="opacity:0.5; text-transform:uppercase; font-weight:bold;">Zpráva:</span> <span id="uiPayMsg" style="color:var(--neon); font-weight:900;"></span></div>
             </div>
             
-            <button class="btn-add-ticket" style="margin-top:20px;" onclick="uiCloseCart()">ZAVŘÍT TIKET</button>
+            <button class="btn-add-ticket" style="margin-top:20px;" onclick="uiCloseCart()">HOTOVO</button>
         </div>
     </div>
 
@@ -143,7 +143,7 @@
 
         let localCart = {};
         let activeDeadlines = {};
-        const ALLOWED_ADMINS = ["Pepa", "Admin2"]; // Tady doplň povolená jména
+        const ALLOWED_ADMINS = ["Pepa", "Admin2"];
 
         const user = AuthService.getUser();
         if (!user) {
@@ -157,7 +157,6 @@
             if(ALLOWED_ADMINS.includes(user.name)) document.getElementById('adminBtn').style.display = 'flex';
         }
 
-        // --- NAČÍTÁNÍ BANKŮ (15/5) ---
         firebase.database().ref('sazkyData_v2').on('value', snap => {
             const data = snap.val() || {};
             const prev = parseInt(data.prevedenyBank) || 0;
@@ -172,7 +171,6 @@
             document.getElementById('uiBankNadeje').innerText = jack.toLocaleString();
         });
 
-        // --- ZÁPASY ---
         DBService.getMatches(zapasy => {
             const container = document.getElementById('matchList');
             container.innerHTML = "";
@@ -248,17 +246,21 @@
         window.actionSendTicket = async () => {
             const sum = Object.keys(localCart).length * 20;
             const msg = `Sazka_${user.name}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            
-            // Logika QR a platebního tlačítka (v4.9.1)
             const qrUrl = `https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=295511827&bankCode=0300&amount=${sum}&currency=CZK&message=${msg}`;
-            const deepLink = `spayid://1.1?acc=295511827*0300&am=${sum}&cc=CZK&msg=${msg}`;
 
             document.getElementById('uiQrImage').src = qrUrl;
             document.getElementById('uiPayPrice').innerText = `${sum} Kč`;
             document.getElementById('uiPayMsg').innerText = msg;
             
-            const btnPlace = document.getElementById('uiPayButtonPlace');
-            btnPlace.innerHTML = `<a href="${deepLink}" style="display:block; background:#fff; color:#000; padding:18px; border-radius:20px; text-decoration:none; font-weight:900; margin-top:20px; font-size:0.9em; box-shadow: 0 0 25px rgba(255,255,255,0.3);">📱 OTEVŘÍT BANKOVNÍ APLIKACI</a>`;
+            // Logika stažení
+            document.getElementById('btnDownloadQR').onclick = () => {
+                const link = document.createElement('a');
+                link.href = qrUrl;
+                link.download = `QR_Sazka_${user.name}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
 
             try {
                 await DBService.sendTicket(localCart);
@@ -282,6 +284,5 @@
             });
         }, 1000);
     </script>
-    <script src="js/notifications.js"></script>
 </body>
 </html>
