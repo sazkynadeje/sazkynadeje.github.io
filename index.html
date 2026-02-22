@@ -2,8 +2,15 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KANCELÁŘ NADĚJE v4.9.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KANCELÁŘ NADĚJE v5.0</title>
+
+    <meta name="apple-mobile-web-app-title" content="Naděje v2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="IMG_8429.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="IMG_8429.png">
+    <link rel="manifest" href="manifest.json">
 
     <script>
         (function(w,d, s, id) {
@@ -21,27 +28,44 @@
         });
     </script>
 
-    <script src="stats.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        /* TADY ZŮSTÁVÁ TVŮJ KOMPLETNÍ DESIGN v4.9.1 */
-        :root { --neon: #00f2ff; --dark: #0f172a; --card-bg: rgba(255, 255, 255, 0.05); --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); --transition-fast: all 0.2s ease; }
+        :root { 
+            --neon: #00f2ff; 
+            --dark: #0f172a; 
+            --card-bg: rgba(255, 255, 255, 0.05); 
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            --transition-fast: all 0.2s ease; 
+        }
+        
         body { background-color: var(--dark); color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        
+        /* Navigace */
+        .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -20px auto 30px auto; justify-content: center; }
+        .nav-btn { flex: 1; padding: 15px 5px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; text-decoration: none; color: #fff; font-size: 0.7em; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-fast); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+        .nav-btn:hover { border-color: var(--neon); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,242,255,0.1); }
+        .nav-btn.active { border-color: var(--neon); background: rgba(0, 242, 255, 0.05); }
+
         .admin-lock { position: fixed; top: 20px; right: 20px; width: 48px; height: 48px; background: rgba(15, 23, 42, 0.9); border: 2px solid var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.3em; z-index: 9999; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); backdrop-filter: blur(10px); }
         .header-logo { max-width: 450px; width: 90%; margin: 20px 0 40px 0; filter: drop-shadow(0 0 10px var(--neon)); animation: neonGlow 4s ease-in-out infinite alternate; }
+        
         @keyframes neonGlow { 0% { filter: drop-shadow(0 0 5px var(--neon)); transform: scale(1); } 100% { filter: drop-shadow(0 0 25px var(--neon)); transform: scale(1.02); } }
+        
         .bank-box { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 30px; padding: 30px; min-width: 300px; margin-bottom: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
         .bank-main-val { font-size: 3.2em; font-weight: 900; text-shadow: 0 0 20px var(--neon); }
-        .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); position: relative; backdrop-filter: blur(15px); text-align: center; }
+        
+        .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); position: relative; backdrop-filter: blur(15px); width: 90%; max-width: 450px; }
         .flags-wrapper { display: flex; justify-content: center; align-items: center; gap: 25px; margin: 25px 0; }
         .flag-img { width: 110px; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); animation: flagWave 3s ease-in-out infinite; transform-origin: left center; }
         @keyframes flagWave { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(35deg) scale(1.05); } }
+        
         .vs-circle { background: var(--neon); color: var(--dark); border-radius: 50%; width: 50px; height: 50px; line-height: 50px; font-weight: 900; }
         .score-input { width: 85px; height: 75px; text-align: center; font-weight: 900; font-size: 2.2em; background: #000; border: 3px solid #334155; color: #fff; border-radius: 22px; }
         .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; }
         .btn-add-ticket { width: 100%; background: var(--neon); color: var(--dark); border: none; padding: 22px; border-radius: 20px; font-weight: 900; text-transform: uppercase; cursor: pointer; }
+        
         .fab-cart { position: fixed; bottom: 35px; right: 35px; width: 75px; height: 75px; background: var(--neon); color: var(--dark); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 2em; z-index: 5000; box-shadow: 0 15px 40px rgba(0, 242, 255, 0.4); }
         #cartModal { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 520px; background: #1e293b; border: 2px solid var(--neon); border-radius: 40px; padding: 35px; display: none; z-index: 9999; box-shadow: 0 0 100px rgba(0,0,0,0.9); }
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 50000; display: none; align-items: center; justify-content: center; }
@@ -66,9 +90,16 @@
         <div id="userWelcome" style="margin-top:15px; color:var(--neon); font-weight:bold; letter-spacing:1px;"></div>
     </div>
 
-    <a href="statistiky.html" class="btn-stats">📊 ŽEBŘÍČKY A STATISTIKY</a>
+    <div class="nav-container">
+        <a href="statistiky.html" class="nav-btn">
+            <span style="font-size:1.5em;">📊</span>ŽEBŘÍČEK
+        </a>
+        <a href="profil.html" class="nav-btn active">
+            <span style="font-size:1.5em;">👤</span>MŮJ PROFIL
+        </a>
+    </div>
 
-    <div id="matchList"></div>
+    <div id="matchList">Načítám zápasy...</div>
 
     <div id="fabCart" class="fab-cart" onclick="uiOpenCart()">
         🎟️ <div id="fabBadge" style="position:absolute; top:-5px; right:-5px; background:#ff4444; color:white; width:28px; height:28px; border-radius:50%; font-size:0.5em; display:flex; align-items:center; justify-content:center; border:3px solid var(--dark);">0</div>
@@ -94,7 +125,6 @@
         let localCart = {};
         let activeDeadlines = {};
 
-        // 1. LOGIN LOGIKA (V2)
         const user = AuthService.getUser();
         if (!user) {
             document.getElementById('loginOverlay').style.display = 'flex';
@@ -109,7 +139,6 @@
             document.getElementById('userWelcome').innerText = `HRÁČ: ${user.name.toUpperCase()}`;
         }
 
-        // 2. NAČÍTÁNÍ DAT (V2 sahá do sazkyData_v2)
         DBService.getBank(val => document.getElementById('uiMainBank').innerText = val);
 
         DBService.getMatches(zapasy => {
@@ -117,7 +146,7 @@
             container.innerHTML = "";
             if (!zapasy) return;
 
-            Object.entries(zapasy).forEach(([id, m]) => {
+            Object.entries(zapasy).reverse().forEach(([id, m]) => {
                 activeDeadlines[id] = m.deadline;
                 const isEvaluated = m.status === "vyhodnoceno";
                 const now = Date.now();
@@ -153,7 +182,6 @@
                 `;
                 container.appendChild(card);
 
-                // Zobrazení existujících sázek z v2 větve
                 if (m.sazky) {
                     const bList = document.getElementById(`bets-list-${id}`);
                     Object.values(m.sazky).forEach(s => {
@@ -166,7 +194,6 @@
             });
         });
 
-        // 3. UI FUNKCE
         window.uiToggleMatch = (id) => {
             const el = document.getElementById(`detail-${id}`);
             el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -177,7 +204,6 @@
             const sH = document.getElementById(`scH-${id}`).value;
             const str = document.getElementById(`striker-${id}`).value;
             if (sD === "" || sH === "" || !str) return alert("Doplň tip i střelce!");
-
             localCart[id] = { tip: `${sD}:${sH}`, strelec: str, matchName: mName };
             document.getElementById('fabCart').style.display = 'flex';
             document.getElementById('fabBadge').innerText = Object.keys(localCart).length;
@@ -207,13 +233,10 @@
                     await DBService.sendTicket(localCart);
                     alert("Tiket úspěšně odeslán!");
                     location.reload();
-                } catch (e) {
-                    alert(e.message);
-                }
+                } catch (e) { alert(e.message); }
             }
         };
 
-        // 4. TIMERY
         setInterval(() => {
             const now = Date.now();
             Object.entries(activeDeadlines).forEach(([id, dl]) => {
@@ -232,7 +255,6 @@
             });
         }, 1000);
     </script>
-
     <script src="js/notifications.js"></script>
 </body>
 </html>
