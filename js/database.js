@@ -36,13 +36,13 @@ export const DBService = {
         db.ref('sazkyData_v2/stats').on('value', s => callback(s.val() || {}));
     },
 
-    // Načte specifická data hráče (včetně odznaků, které tam budeme sázet)
+    // Načte specifická data hráče
     getPlayerProfile: (playerName, callback) => {
         const id = sanitizeId(playerName);
         db.ref(`sazkyData_v2/players/${id}`).on('value', s => callback(s.val() || {}));
     },
 
-    // BEZPEČNÉ A RYCHLÉ ODESLÁNÍ TIKETU (Atomická transakce)
+    // ODESLÁNÍ TIKETU S OKAMŽITÝM PŘIČTENÍM DO BANKU NADĚJE
     sendTicket: async (cart) => {
         const userData = AuthService.getUser(); 
         
@@ -51,7 +51,11 @@ export const DBService = {
         }
 
         const updates = {};
-        const uId = sanitizeId(userData.name); // Sjednocení ID pro celou aplikaci
+        const uId = sanitizeId(userData.name);
+        const matchCount = Object.keys(cart).length;
+        
+        // --- LOGIKA 5 Kč DO NADĚJE ---
+        const contributionToNadeje = matchCount * 5;
 
         for (const [matchId, bet] of Object.entries(cart)) {
             const ticketId = db.ref().child(`sazkyData_v2/zapasy/${matchId}/sazky`).push().key;
@@ -59,15 +63,20 @@ export const DBService = {
                 ...bet,
                 userId: uId,
                 jmeno: userData.name,
-                zaplaceno: false, // Každá nová sázka začíná jako nezaplacená
+                zaplaceno: false,
                 timestamp: Date.now()
             };
         }
-        
-        // Zvýšíme counter odeslaných tiketů pro odznaky věrnosti
-        const statsRef = db.ref(`sazkyData_v2/players/${uId}/activity/ticketsSent`);
-        await statsRef.transaction(current => (current || 0) + Object.keys(cart).length);
 
+        // 1. Přičtení do Banku Naděje (Jackpotu) okamžitě
+        const nadejeRef = db.ref('sazkyData_v2/bankNadeje');
+        await nadejeRef.transaction(current => (current || 0) + contributionToNadeje);
+        
+        // 2. Zvýšíme counter odeslaných tiketů pro odznaky
+        const activityRef = db.ref(`sazkyData_v2/players/${uId}/activity/ticketsSent`);
+        await activityRef.transaction(current => (current || 0) + matchCount);
+
+        // 3. Uložení samotných sázek
         return db.ref().update(updates);
     }
 };
