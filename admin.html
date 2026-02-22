@@ -112,10 +112,10 @@
     
     let currentStrelci = [];
 
-    // --- WEBPUSHR LOGIKA ---
+    // --- WEBPUSHR LOGIKA (AKTUALIZOVANÁ) ---
     async function sendPush(title, msg, scheduledDate = null) {
-        const key = "cc80b06b1a513c4ac1227033bda09e2a";
-        const token = "119013";
+        const key = "082b774147872e56c9f183c31d86c0a8";
+        const token = "119028";
         let body = {
             "title": title,
             "message": msg,
@@ -298,10 +298,10 @@
 
             await db.ref().update(updates);
             
-            // ODESLÁNÍ NOTIFIKACE PO VYHODNOCENÍ
+            // --- ZPRÁVA NA WEB A NOTIFIKACE ---
+            showStatus("Vyhodnoceno a notifikace odeslána! 🚀");
             await sendPush("Zápas vyhodnocen! 🏁", `${z.domaci} - ${z.hoste} skončilo ${d}:${h}. Koukni na body!`);
             
-            showStatus("Vyhodnoceno a notifikace odeslána! 🚀");
             closeModal();
         });
     }
@@ -315,17 +315,19 @@
         const matchRef = db.ref('sazkyData_v2/zapasy').push();
         await matchRef.set({ domaci: d, hoste: h, kodD: kd, kodH: kh, deadline: dl, status: "aktivni" });
         
-        // OKAMŽITÁ NOTIFIKACE
+        // --- ZPRÁVA NA WEB A NOTIFIKACE ---
+        showStatus("Publikováno a notifikace odeslány! ✅");
+        
+        // Okamžitá
         await sendPush("Nový zápas vypsán! 🏒", `${d} vs ${h}. Vsaď si včas!`);
 
-        // PLÁNOVANÁ PŘIPOMÍNKA (30 min před deadlinem)
+        // Plánovaná (30 min předem)
         const deadlineDate = new Date(dl);
         const reminderDate = new Date(deadlineDate.getTime() - (30 * 60000));
         if (reminderDate > new Date()) {
             await sendPush("Poslední šance vsadit! ⏳", `Sázky na ${d} - ${h} končí za 30 minut!`, reminderDate);
         }
 
-        showStatus("Publikováno a notifikace nastaveny! ✅");
         setTimeout(() => location.reload(), 1500);
     }
 
@@ -350,8 +352,10 @@
     }
 
     function showStatus(text) {
-        const msg = document.getElementById('statusMsg'); msg.innerText = text; msg.style.display = 'block';
-        setTimeout(() => msg.style.display = 'none', 2500);
+        const msg = document.getElementById('statusMsg'); 
+        msg.innerText = text; 
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 3500);
     }
 
     function closeModal() { document.getElementById('modalOverlay').style.display='none'; document.getElementById('evalModal').style.display='none'; }
