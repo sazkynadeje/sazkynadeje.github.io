@@ -1,6 +1,6 @@
-
 // js/economy.js
 export const EconomyService = {
+    // Tato funkce jen sleduje data a aktualizuje UI prvky, pokud na stránce existují
     init: (db) => {
         const dbRef = db.ref('sazkyData_v2');
 
@@ -9,8 +9,8 @@ export const EconomyService = {
             const prev = parseInt(data.prevedenyBank) || 0;
             const jack = parseInt(data.bankNadeje) || 0;
             const obehrano = parseInt(data.vOběhuCelkem) || 0;
-            let dailyExtra = 0;
             
+            let dailyExtra = 0;
             if (data.zapasy) {
                 const aktivni = Object.values(data.zapasy)
                     .filter(m => m.status === "aktivni")
@@ -21,10 +21,29 @@ export const EconomyService = {
                 }
             }
 
-            // Aktualizace UI prvků
-            document.getElementById('uiMainBank').innerText = (prev + dailyExtra).toLocaleString();
-            document.getElementById('uiBankNadeje').innerText = jack.toLocaleString();
-            document.getElementById('uiCelkovyVklad').innerText = obehrano.toLocaleString();
+            // --- PRO INDEX (Hráči) ---
+            const uiMain = document.getElementById('uiMainBank');
+            const uiNadeje = document.getElementById('uiBankNadeje');
+            const uiVklad = document.getElementById('uiCelkovyVklad');
+
+            if (uiMain) uiMain.innerText = (prev + dailyExtra).toLocaleString();
+            if (uiNadeje) uiNadeje.innerText = jack.toLocaleString();
+            if (uiVklad) uiVklad.innerText = obehrano.toLocaleString();
+
+            // --- PRO ADMIN (Vstupy/Inputy) ---
+            const inPrev = document.getElementById('prevBankInput');
+            const inNadeje = document.getElementById('nadejeBankInput');
+            const inVklad = document.getElementById('vOběhuInput');
+
+            // Adminovi doplňujeme hodnoty do políček, jen pokud je zrovna needituje
+            if (inPrev && document.activeElement !== inPrev) inPrev.value = prev;
+            if (inNadeje && document.activeElement !== inNadeje) inNadeje.value = jack;
+            if (inVklad && document.activeElement !== inVklad) inVklad.value = obehrano;
         });
+    },
+
+    // Pomocná funkce pro ukládání z adminu
+    saveBank: (db, path, value) => {
+        return db.ref('sazkyData_v2/' + path).set(parseInt(value) || 0);
     }
 };
