@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin v2.6 - KANCELÁŘ NADĚJE</title>
+    <title>Admin v2.7 - KANCELÁŘ NADĚJE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -31,6 +31,9 @@
         .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 500px; background: #1e293b; border-radius: 25px; display: none; z-index: 3000; padding: 30px; border: 2px solid var(--blue); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 2999; }
         #statusMsg { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 15px 30px; border-radius: 50px; font-weight: bold; z-index: 9999; box-shadow: 0 0 20px var(--blue); }
+        
+        /* Styl pro zamknuté vstupy */
+        input:disabled { opacity: 0.5; border: 1px dashed #555; cursor: not-allowed; color: #aaa; }
     </style>
 </head>
 <body>
@@ -112,7 +115,7 @@
     
     let currentStrelci = [];
 
-    // --- WEBPUSHR LOGIKA (AKTUALIZOVANÁ) ---
+    // --- WEBPUSHR LOGIKA ---
     async function sendPush(title, msg, scheduledDate = null) {
         const key = "082b774147872e56c9f183c31d86c0a8";
         const token = "119028";
@@ -177,6 +180,8 @@
             if (m.sazky) {
                 Object.entries(m.sazky).forEach(([bid, s]) => {
                     const isPaid = s.zaplaceno || false;
+                    const isEvaluated = m.status === "vyhodnoceno"; // <--- Kontrola zamknutí
+
                     betsHtml += `
                         <div class="bet-row">
                             <button class="paid-toggle" onclick="togglePaid('${mid}','${bid}',${isPaid})" 
@@ -184,9 +189,14 @@
                                 ${isPaid ? 'OK' : 'DLUŽÍ'}
                             </button>
                             <div style="flex:1; font-size:0.8em;"><strong>${s.jmeno}</strong></div>
-                            <input type="text" id="editTip-${mid}-${bid}" value="${s.tip}" style="width:50px; margin:0; padding:5px; font-size:0.8em; text-align:center;">
-                            <input type="text" id="editStr-${mid}-${bid}" value="${s.strelec}" style="width:80px; margin:0; padding:5px; font-size:0.8em;">
-                            <button onclick="updateBet('${mid}','${bid}')" style="background:none; border:none; cursor:pointer;">💾</button>
+                            <input type="text" id="editTip-${mid}-${bid}" value="${s.tip || s.skore}" 
+                                   ${isEvaluated ? 'disabled' : ''} 
+                                   style="width:50px; margin:0; padding:5px; font-size:0.8em; text-align:center;">
+                            <input type="text" id="editStr-${mid}-${bid}" value="${s.strelec}" 
+                                   ${isEvaluated ? 'disabled' : ''} 
+                                   style="width:80px; margin:0; padding:5px; font-size:0.8em;">
+                            
+                            ${!isEvaluated ? `<button onclick="updateBet('${mid}','${bid}')" style="background:none; border:none; cursor:pointer;">💾</button>` : ''}
                         </div>
                     `;
                 });
@@ -291,14 +301,13 @@
             });
 
             updates[`sazkyData_v2/prevedenyBank`] = finalWinners.length > 0 ? 0 : totalDailyPool;
-            updates[`sazkyData_v2/bankNadeje`] = currentNadeje + doBankuNadeje;
+            // Poznámka: bankNadeje se už přičítá hned při odeslání sázky v indexu
             updates[`sazkyData_v2/zapasy/${mid}/status`] = "vyhodnoceno";
             updates[`sazkyData_v2/zapasy/${mid}/vysledek`] = `${d}:${h}`;
             updates[`sazkyData_v2/zapasy/${mid}/strelciZapasu`] = currentStrelci;
 
             await db.ref().update(updates);
             
-            // --- ZPRÁVA NA WEB A NOTIFIKACE ---
             showStatus("Vyhodnoceno a notifikace odeslána! 🚀");
             await sendPush("Zápas vyhodnocen! 🏁", `${z.domaci} - ${z.hoste} skončilo ${d}:${h}. Koukni na body!`);
             
@@ -306,7 +315,6 @@
         });
     }
 
-    // --- PUBLIKACE ZÁPASU ---
     async function publishMatch() {
         const d = document.getElementById('d').value, h = document.getElementById('h').value,
               kd = document.getElementById('kd').value, kh = document.getElementById('kh').value, dl = document.getElementById('dl').value;
@@ -315,13 +323,9 @@
         const matchRef = db.ref('sazkyData_v2/zapasy').push();
         await matchRef.set({ domaci: d, hoste: h, kodD: kd, kodH: kh, deadline: dl, status: "aktivni" });
         
-        // --- ZPRÁVA NA WEB A NOTIFIKACE ---
         showStatus("Publikováno a notifikace odeslány! ✅");
-        
-        // Okamžitá
         await sendPush("Nový zápas vypsán! 🏒", `${d} vs ${h}. Vsaď si včas!`);
 
-        // Plánovaná (30 min předem)
         const deadlineDate = new Date(dl);
         const reminderDate = new Date(deadlineDate.getTime() - (30 * 60000));
         if (reminderDate > new Date()) {
