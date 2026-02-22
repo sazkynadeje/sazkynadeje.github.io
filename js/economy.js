@@ -1,7 +1,8 @@
-// js/economy.js
+import { db } from './config.js'; // Přidáváme přímý import
+
 export const EconomyService = {
-    // Tato funkce jen sleduje data a aktualizuje UI prvky, pokud na stránce existují
-    init: (db) => {
+    // Odstranili jsme (db) z argumentu, protože ji importujeme nahoře
+    init: () => {
         const dbRef = db.ref('sazkyData_v2');
 
         dbRef.on('value', snap => {
@@ -21,7 +22,6 @@ export const EconomyService = {
                 }
             }
 
-            // --- PRO INDEX (Hráči) ---
             const uiMain = document.getElementById('uiMainBank');
             const uiNadeje = document.getElementById('uiBankNadeje');
             const uiVklad = document.getElementById('uiCelkovyVklad');
@@ -30,20 +30,18 @@ export const EconomyService = {
             if (uiNadeje) uiNadeje.innerText = jack.toLocaleString();
             if (uiVklad) uiVklad.innerText = obehrano.toLocaleString();
 
-            // --- PRO ADMIN (Vstupy/Inputy) ---
             const inPrev = document.getElementById('prevBankInput');
             const inNadeje = document.getElementById('nadejeBankInput');
             const inVklad = document.getElementById('vOběhuInput');
 
-            // Adminovi doplňujeme hodnoty do políček, jen pokud je zrovna needituje
             if (inPrev && document.activeElement !== inPrev) inPrev.value = prev;
             if (inNadeje && document.activeElement !== inNadeje) inNadeje.value = jack;
             if (inVklad && document.activeElement !== inVklad) inVklad.value = obehrano;
         });
     },
 
-    // Pomocná funkce pro ukládání z adminu
-    saveBank: (db, path, value) => {
+    // Také zde jsme odstranili db z argumentu
+    saveBank: (path, value) => {
         return db.ref('sazkyData_v2/' + path).set(parseInt(value) || 0);
     }
 };
