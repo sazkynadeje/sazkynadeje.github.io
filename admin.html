@@ -34,6 +34,7 @@
         .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 550px; background: #1e293b; border-radius: 35px; display: none; z-index: 3000; padding: 40px; border: 2px solid var(--blue); box-shadow: 0 0 100px rgba(0,0,0,0.8); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; z-index: 2999; backdrop-filter: blur(5px); }
         #statusMsg { display: none; position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 18px 40px; border-radius: 50px; font-weight: 900; z-index: 9999; box-shadow: 0 0 30px var(--blue); }
+        .history-title { margin-top: 50px; font-weight: 900; opacity: 0.3; text-align: center; letter-spacing: 5px; }
     </style>
 </head>
 <body>
@@ -97,7 +98,7 @@
         <span style="font-size:3em; font-weight:900;">:</span>
         <input type="number" id="finalH" style="width:90px; height:80px; text-align:center; font-size:2.5em; border-radius:20px; border:2px solid var(--blue); background:#000; color:#fff;">
     </div>
-    <label>Střelci zápasu:</label>
+    <label>Střelci zápasu (Livesport):</label>
     <div id="finalStrelci" class="tag-container"></div>
     <div style="display:flex; gap:12px; margin-bottom:30px;">
         <input type="text" id="addStrelecInput" placeholder="Přidat střelce ručně..." style="margin:0;">
@@ -115,18 +116,20 @@
     let currentStrelci = [];
     let currentMid = null;
 
-    // --- INICIALIZACE MODULŮ ---
-    EconomyService.init(db);
-    db.ref('sazkyData_v2/zapasy').on('value', snap => AdminUI.renderMatches(snap, db));
+    // --- INICIALIZACE ---
+    EconomyService.init(); // Modul si 'db' bere sám z configu
+    db.ref('sazkyData_v2/zapasy').on('value', snap => AdminUI.renderMatches(snap));
 
-    // --- FINANČNÍ OPERACE ---
+    // --- GLOBÁLNÍ FUNKCE PRO HTML ONCLICK ---
     window.saveBank = (path, inputId) => {
         const val = document.getElementById(inputId).value;
-        EconomyService.saveBank(db, path, val).then(() => showStatus("Uloženo v DB! ✅"));
+        EconomyService.saveBank(path, val).then(() => showStatus("Uloženo v DB! ✅"));
     };
 
-    // --- SPRÁVA SÁZEK ---
-    window.adminTogglePaid = (mid, bid, cur) => db.ref(`sazkyData_v2/zapasy/${mid}/sazky/${bid}`).update({ zaplaceno: !cur });
+    window.adminTogglePaid = (mid, bid, cur) => {
+        db.ref(`sazkyData_v2/zapasy/${mid}/sazky/${bid}`).update({ zaplaceno: !cur });
+    };
+
     window.adminUpdateBet = (mid, bid) => {
         const tip = document.getElementById(`editTip-${mid}-${bid}`).value;
         const str = document.getElementById(`editStr-${mid}-${bid}`).value;
@@ -134,7 +137,6 @@
         showStatus("Změny uloženy! 💾");
     };
 
-    // --- AUTOMATICKÉ VLAJKY ---
     window.autoFlag = () => {
         const dVal = document.getElementById('d').value.trim().toLowerCase();
         const hVal = document.getElementById('h').value.trim().toLowerCase();
@@ -150,7 +152,6 @@
         if (cH) document.getElementById('kh').value = cH;
     };
 
-    // --- VYHODNOCENÍ ---
     window.adminStartEval = (mid) => {
         const raw = document.getElementById(`raw-${mid}`).value;
         if(!raw) return alert("Vlož text z Livesportu!");
@@ -172,7 +173,11 @@
 
     window.addManualTag = () => {
         const v = document.getElementById('addStrelecInput').value;
-        if(v) { currentStrelci.push(v); AdminUI.renderTags(currentStrelci, 'finalStrelci'); document.getElementById('addStrelecInput').value = ""; }
+        if(v) { 
+            currentStrelci.push(v); 
+            AdminUI.renderTags(currentStrelci, 'finalStrelci'); 
+            document.getElementById('addStrelecInput').value = ""; 
+        }
     };
 
     async function finishEval(mid) {
@@ -186,18 +191,29 @@
             const pool = (sazky.length * 15) + (parseInt(data.prevedenyBank) || 0);
 
             let winners = sazky.filter(([id, s]) => {
-                const p = s.tip.split(':');
+                const tipStr = s.tip || s.skore || "0:0";
+                const p = tipStr.split(':');
                 return parseInt(p[0]) === d && parseInt(p[1]) === h;
             });
-            let bonus = winners.filter(([id, s]) => fst.some(r => r.includes(s.strelec.toLowerCase().trim())));
+
+            let bonus = winners.filter(([id, s]) => {
+                const sStr = s.strelec || "";
+                return fst.some(r => r.includes(sStr.toLowerCase().trim()));
+            });
+
             let final = bonus.length > 0 ? bonus : winners;
             const share = final.length > 0 ? Math.floor(pool / final.length) : 0;
             const updates = {};
 
             sazky.forEach(([sid, s]) => {
-                const p = s.tip.split(':'), tD = parseInt(p[0]), tH = parseInt(p[1]);
-                const hitS = (tD === d && tH === h), hitSt = fst.some(r => r.includes(s.strelec.toLowerCase().trim()));
+                const tipStr = s.tip || s.skore || "0:0";
+                const p = tipStr.split(':'), tD = parseInt(p[0]), tH = parseInt(p[1]);
+                
+                const hitS = (tD === d && tH === h);
+                const sStr = s.strelec || "";
+                const hitSt = fst.some(r => r.includes(sStr.toLowerCase().trim()));
                 const hitT = (tD > tH && d > h) || (tD < tH && d < h) || (tD === tH && d === h);
+                
                 const pts = (hitS ? 5 : 0) + (hitSt ? 3 : 0) + (hitT ? 1 : 0);
                 const isW = final.some(w => w[0] === sid);
 
@@ -205,6 +221,7 @@
                 updates[`sazkyData_v2/zapasy/${mid}/sazky/${sid}/vyhra`] = isW ? share : 0;
                 updates[`sazkyData_v2/zapasy/${mid}/sazky/${sid}/awarded`] = { points: pts };
 
+                // Statistiky hráčů
                 db.ref(`sazkyData_v2/stats/${s.jmeno}`).transaction(c => {
                     c = c || {celkoveBody:0, vyhry:0};
                     const oldPts = s.awarded ? (s.awarded.points || 0) : 0;
@@ -215,7 +232,9 @@
             });
 
             updates[`sazkyData_v2/prevedenyBank`] = final.length > 0 ? 0 : pool;
-            if(final.length > 0) updates[`sazkyData_v2/vOběhuCelkem`] = Math.max(0, (data.vOběhuCelkem || 0) - pool);
+            if(final.length > 0) {
+                updates[`sazkyData_v2/vOběhuCelkem`] = Math.max(0, (data.vOběhuCelkem || 0) - pool);
+            }
             updates[`sazkyData_v2/zapasy/${mid}/status`] = "vyhodnoceno";
             updates[`sazkyData_v2/zapasy/${mid}/vysledek`] = `${d}:${h}`;
             updates[`sazkyData_v2/zapasy/${mid}/strelciZapasu`] = currentStrelci;
@@ -226,21 +245,34 @@
         });
     }
 
-    // --- POMOCNÉ FUNKCE ---
     window.publishMatch = () => {
-        const d = document.getElementById('d').value, h = document.getElementById('h').value,
-              kd = document.getElementById('kd').value, kh = document.getElementById('kh').value, dl = document.getElementById('dl').value;
+        const d = document.getElementById('d').value, 
+              h = document.getElementById('h').value,
+              kd = document.getElementById('kd').value, 
+              kh = document.getElementById('kh').value, 
+              dl = document.getElementById('dl').value;
         if(!d || !h || !dl) return alert("Vyplň vše!");
-        db.ref('sazkyData_v2/zapasy').push().set({ domaci: d, hoste: h, kodD: kd, kodH: kh, deadline: dl, status: "aktivni" })
-        .then(() => { showStatus("Publikováno! ✅"); location.reload(); });
+        
+        db.ref('sazkyData_v2/zapasy').push().set({ 
+            domaci: d, hoste: h, kodD: kd, kodH: kh, deadline: dl, status: "aktivni" 
+        }).then(() => { 
+            showStatus("Publikováno! ✅"); 
+            document.getElementById('d').value = "";
+            document.getElementById('h').value = "";
+        });
     };
 
     window.adminDeleteMatch = (id) => { if(confirm("Smazat?")) db.ref('sazkyData_v2/zapasy/'+id).remove(); };
     window.adminReopenMatch = (id) => db.ref(`sazkyData_v2/zapasy/${id}/status`).set('aktivni');
-    window.closeModal = () => { document.getElementById('modalOverlay').style.display='none'; document.getElementById('evalModal').style.display='none'; };
+    window.closeModal = () => { 
+        document.getElementById('modalOverlay').style.display='none'; 
+        document.getElementById('evalModal').style.display='none'; 
+    };
     
     function showStatus(t) {
-        const m = document.getElementById('statusMsg'); m.innerText = t; m.style.display = 'block';
+        const m = document.getElementById('statusMsg'); 
+        m.innerText = t; 
+        m.style.display = 'block';
         setTimeout(() => m.style.display = 'none', 3500);
     }
 </script>
