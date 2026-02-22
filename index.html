@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v5.6</title>
+    <title>KANCELÁŘ NADĚJE v5.7</title>
 
     <meta name="apple-mobile-web-app-title" content="Naděje v2">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -122,17 +122,13 @@
 
         <div id="cartPost" style="display:none; text-align:center;">
             <h2 style="color:var(--neon); margin-bottom:10px;">✅ PŘIJATO!</h2>
-            
             <img id="uiQrImage" src="" style="width:230px; background:white; padding:12px; border-radius:25px; box-shadow: 0 0 40px rgba(0,0,0,0.5);">
-            
             <button id="btnDownloadQR" class="btn-download">📸 ULOŽIT QR KÓD</button>
-
             <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; text-align:left; margin-top:20px; border:1px solid rgba(0,242,255,0.2);">
                 <div style="font-size:0.8em; margin-bottom:5px;"><span style="opacity:0.5; text-transform:uppercase; font-weight:bold;">Účet:</span> <span style="color:var(--neon); font-weight:900;">295511827 / 0300</span></div>
                 <div style="font-size:0.8em; margin-bottom:5px;"><span style="opacity:0.5; text-transform:uppercase; font-weight:bold;">Částka:</span> <span id="uiPayPrice" style="color:var(--neon); font-weight:900;"></span></div>
                 <div style="font-size:0.8em;"><span style="opacity:0.5; text-transform:uppercase; font-weight:bold;">Zpráva:</span> <span id="uiPayMsg" style="color:var(--neon); font-weight:900;"></span></div>
             </div>
-            
             <button class="btn-add-ticket" style="margin-top:20px;" onclick="uiCloseCart()">HOTOVO</button>
         </div>
     </div>
@@ -146,6 +142,8 @@
         const ALLOWED_ADMINS = ["Pepa", "Admin2"];
 
         const user = AuthService.getUser();
+        const uId = user ? user.name.toLowerCase().replace(/\s/g, '') : null;
+
         if (!user) {
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('loginBtn').onclick = () => {
@@ -181,6 +179,9 @@
                 const isEval = m.status === "vyhodnoceno";
                 const isClosed = Date.now() > new Date(m.deadline).getTime();
                 
+                // Kontrola, zda uživatel již vsadil
+                const userHasBet = m.sazky && Object.values(m.sazky).some(s => s.userId === uId || s.jmeno === user.name);
+
                 const card = document.createElement('div');
                 card.className = "match-card";
                 card.onclick = () => { const d = document.getElementById(`det-${id}`); d.style.display = d.style.display === 'none' ? 'block' : 'none'; };
@@ -195,15 +196,17 @@
                         <div class="flag-container"><img class="flag-img" src="https://flagcdn.com/w160/${m.kodH}.png"><br><small>${m.hoste}</small></div>
                     </div>
                     <div id="det-${id}" style="display:none; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation()">
-                        ${(!isClosed && !isEval) ? `
-                            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                        ${(!isClosed && !isEval) ? (
+                            userHasBet ? 
+                            `<div style="color:var(--neon); font-weight:900; padding:15px; border:1px dashed var(--neon); border-radius:15px; font-size:0.8em;">UŽ MÁŠ VSADZENO ✅</div>` :
+                            `<div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
                                 <input type="number" id="scD-${id}" class="score-input" placeholder="0">
                                 <span style="font-size:2em; font-weight:900;">:</span>
                                 <input type="number" id="scH-${id}" class="score-input" placeholder="0">
                             </div>
                             <input type="text" id="str-${id}" class="input-field" placeholder="Příjmení střelce">
-                            <button class="btn-add-ticket" onclick="actionAdd('${id}', '${m.domaci} vs ${m.hoste}')">PŘIDAT NA TIKET (20 Kč)</button>
-                        ` : `<div style="font-weight:900; color:var(--neon);">SÁZKY UZAVŘENY</div>`}
+                            <button class="btn-add-ticket" onclick="actionAdd('${id}', '${m.domaci} vs ${m.hoste}')">PŘIDAT NA TIKET (20 Kč)</button>`
+                        ) : `<div style="font-weight:900; color:var(--neon);">SÁZKY UZAVŘENY</div>`}
                         <div id="bets-${id}" style="margin-top:15px;"></div>
                     </div>`;
                 container.appendChild(card);
@@ -211,7 +214,7 @@
                     const bl = document.getElementById(`bets-${id}`);
                     Object.values(m.sazky).forEach(s => {
                         bl.innerHTML += `<div style="font-size:0.85em; background:rgba(255,255,255,0.03); padding:10px; border-radius:12px; margin-bottom:6px; display:flex; justify-content:space-between;">
-                            <span>${s.stav || '⏳'} ${s.jmeno}</span> <b>${s.tip}</b>
+                            <span>${s.stav || '⏳'} ${s.jmeno}</span> <b>${s.tip || s.skore}</b>
                         </div>`;
                     });
                 }
@@ -221,7 +224,10 @@
         window.actionAdd = (id, mName) => {
             const sD = document.getElementById(`scD-${id}`).value, sH = document.getElementById(`scH-${id}`).value, str = document.getElementById(`str-${id}`).value;
             if(sD==="" || sH==="" || !str) return alert("Doplň tip!");
+            
+            // Ošetření přepsání v košíku (jeden zápas = jeden tip)
             localCart[id] = { tip: `${sD}:${sH}`, strelec: str, matchName: mName };
+            
             document.getElementById('fabCart').style.display='flex';
             document.getElementById('fabBadge').innerText = Object.keys(localCart).length;
             alert("Přidáno na tiket.");
@@ -244,7 +250,10 @@
         window.uiCloseCart = () => document.getElementById('cartModal').style.display = 'none';
 
         window.actionSendTicket = async () => {
-            const sum = Object.keys(localCart).length * 20;
+            const uniqueMatchCount = Object.keys(localCart).length;
+            if (uniqueMatchCount === 0) return;
+
+            const sum = uniqueMatchCount * 20;
             const msg = `Sazka_${user.name}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             const qrUrl = `https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=295511827&bankCode=0300&amount=${sum}&currency=CZK&message=${msg}`;
 
@@ -252,7 +261,6 @@
             document.getElementById('uiPayPrice').innerText = `${sum} Kč`;
             document.getElementById('uiPayMsg').innerText = msg;
             
-            // Logika stažení
             document.getElementById('btnDownloadQR').onclick = () => {
                 const link = document.createElement('a');
                 link.href = qrUrl;
@@ -263,11 +271,17 @@
             };
 
             try {
+                // Přičtení do Banku Naděje hned při odeslání (přesná logika 5 Kč / zápas)
+                const nadejeRef = firebase.database().ref('sazkyData_v2/bankNadeje');
+                await nadejeRef.transaction(curr => (curr || 0) + (uniqueMatchCount * 5));
+
                 await DBService.sendTicket(localCart);
+                
                 document.getElementById('cartPre').style.display = 'none';
                 document.getElementById('cartPost').style.display = 'block';
                 localCart = {};
                 document.getElementById('fabCart').style.display = 'none';
+                document.getElementById('fabBadge').innerText = "0";
             } catch(e) { alert(e.message); }
         };
 
