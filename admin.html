@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin v2.8 - KANCELÁŘ NADĚJE</title>
+    <title>Admin v2.9 - KANCELÁŘ NADĚJE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="js/stats.js"></script>
     
     <style>
         :root { 
@@ -267,7 +268,6 @@
             let finalWinners = winB.length > 0 ? winB : winS;
             const idVyhercuBanku = finalWinners.map(item => item[0]);
             
-            // Kolik se celkem vyplácí
             const totalToPayout = finalWinners.length > 0 ? totalDailyPool : 0;
             const share = finalWinners.length > 0 ? Math.floor(totalDailyPool / finalWinners.length) : 0;
             
@@ -301,10 +301,9 @@
                 });
             });
 
-            // LOGIKA PŘELÉVÁNÍ A ODČÍTÁNÍ Z OBĚHU
             updates[`sazkyData_v2/prevedenyBank`] = finalWinners.length > 0 ? 0 : totalDailyPool;
             
-            // POKUD SE VYPLÁCELO, ODEČTEME TO Z CELKOVÉHO OBĚHU
+            // ODČÍTÁNÍ Z OBĚHU POKUD SE VYPLÁCELO
             if (totalToPayout > 0) {
                 updates[`sazkyData_v2/vOběhuCelkem`] = Math.max(0, currentOběh - totalToPayout);
             }
@@ -340,14 +339,23 @@
         setTimeout(() => location.reload(), 1500);
     }
 
+    // --- AKTUALIZOVANÁ FUNKCE AUTOFLAG S VYUŽITÍM STATS.JS ---
     function autoFlag() {
-        const flags = { 'čes': 'cz', 'kan': 'ca', 'slo': 'sk', 'usa': 'us', 'fin': 'fi', 'švé': 'se' };
-        const dVal = document.getElementById('d').value.toLowerCase();
-        const hVal = document.getElementById('h').value.toLowerCase();
-        for (let key in flags) {
-            if (dVal.includes(key)) document.getElementById('kd').value = flags[key];
-            if (hVal.includes(key)) document.getElementById('kh').value = flags[key];
-        }
+        const dInput = document.getElementById('d').value.trim().toLowerCase();
+        const hInput = document.getElementById('h').value.trim().toLowerCase();
+        
+        const findCode = (text) => {
+            if (text.length < 3) return null;
+            // Hledáme v poli vsechnyStaty z externího souboru
+            const found = vsechnyStaty.find(s => s.n.toLowerCase().includes(text));
+            return found ? found.c : null;
+        };
+
+        const codeD = findCode(dInput);
+        const codeH = findCode(hInput);
+
+        if (codeD) document.getElementById('kd').value = codeD;
+        if (codeH) document.getElementById('kh').value = codeH;
     }
 
     function renderTags() {
