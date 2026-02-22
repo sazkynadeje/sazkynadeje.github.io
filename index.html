@@ -12,163 +12,172 @@
         :root {
             --neon: #00f2ff;
             --bg: #0b0f1a;
-            --card-bg: rgba(30, 41, 59, 0.4);
+            --shadow: 0 0 15px rgba(0, 242, 255, 0.6);
         }
 
         body {
             background-color: var(--bg);
             color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* HLAVIČKA JAKO NA OBRÁZKU */
-        .header-container {
+        /* LOGO A HLAVIČKA Z OBRÁZKU */
+        .header-box {
             width: 100%;
             max-width: 400px;
+            text-align: left;
             margin-top: 10px;
         }
 
         .logo-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
+
+        .logo-row span { font-size: 2.2em; filter: drop-shadow(var(--shadow)); }
 
         .logo-text {
             color: var(--neon);
             font-weight: 900;
-            font-size: 1.6em;
+            font-size: 1.8em;
             text-transform: uppercase;
             letter-spacing: 1px;
-            text-shadow: 0 0 15px var(--neon);
+            text-shadow: 0 0 20px var(--neon), 0 0 40px rgba(0, 242, 255, 0.3);
             margin: 0;
         }
 
-        .bank-info {
-            font-size: 0.95em;
-            font-weight: 600;
-            margin: 5px 0;
+        .bank-stat {
+            font-size: 1.1em;
+            font-weight: 900;
             color: var(--neon);
-            text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+            margin: 8px 0;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         #userWelcome {
             color: var(--neon);
             font-weight: 900;
-            font-size: 1.2em;
+            font-size: 1.4em;
             text-transform: uppercase;
-            text-shadow: 0 0 10px var(--neon);
-            margin: 40px 0;
-            letter-spacing: 2px;
+            text-shadow: 0 0 15px var(--neon);
+            margin: 50px 0;
+            letter-spacing: 4px;
+            text-align: center;
         }
 
-        /* NEONOVÉ TLAČÍKO KOŠÍKU UPROSTŘED */
+        /* TEN NEONOVÝ "OVÁL" (KOŠÍK) */
         #fabCart {
             position: fixed;
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--neon);
-            width: 140px;
-            height: 55px;
-            border-radius: 30px;
+            width: 150px;
+            height: 60px;
+            border-radius: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 30px var(--neon);
+            box-shadow: 0 0 35px var(--neon), inset 0 0 10px rgba(255,255,255,0.5);
             cursor: pointer;
-            z-index: 1000;
+            z-index: 2000;
             border: none;
+            transition: all 0.3s ease;
         }
 
-        .cart-icon {
-            font-size: 24px;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
-        }
+        #fabCart:active { transform: translateX(-50%) scale(0.9); }
+
+        .cart-img { font-size: 30px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.3)); }
 
         #fabBadge {
             position: absolute;
-            top: -8px;
+            top: -10px;
             right: 40px;
-            background: #ff4444;
+            background: #ff3b3b;
             color: white;
-            border-radius: 12px;
-            padding: 2px 8px;
-            font-size: 12px;
+            border-radius: 15px;
+            padding: 3px 10px;
+            font-size: 14px;
             font-weight: 900;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+            box-shadow: 0 0 15px #ff3b3b;
             border: 2px solid var(--bg);
         }
 
-        /* ADMIN OZUBENÉ KOLEČKO */
+        /* ADMIN KOLEČKO */
         #adminBtn {
             position: fixed;
-            bottom: 50px;
-            left: 15%;
-            font-size: 24px;
-            opacity: 0.5;
+            bottom: 45px;
+            left: 10%;
+            font-size: 28px;
+            opacity: 0.4;
+            color: white;
             cursor: pointer;
-            filter: drop-shadow(0 0 5px var(--neon));
-            transition: 0.3s;
+            filter: drop-shadow(var(--shadow));
         }
 
-        #adminBtn:hover { opacity: 1; }
-
-        /* ZÁPASY */
+        /* KARTY ZÁPASŮ */
         #matchList { width: 100%; max-width: 400px; }
         
         .match-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(0, 242, 255, 0.15);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
-        /* LOGIN OVERLAY */
-        #loginOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999;
-            display: none; align-items: center; justify-content: center;
+        /* MODÁLY A FINÁLNÍ DOPLŇKY */
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90%; max-width: 400px; background: #1a2235; 
+            border: 2px solid var(--neon); border-radius: 30px;
+            padding: 30px; z-index: 3000; display: none;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
+    <div class="header-box">
         <div class="logo-row">
-            <span style="font-size: 2em;">🏛️</span>
+            <span>🏛️</span>
             <h1 class="logo-text">KANCELÁŘ NADĚJE</h1>
         </div>
-        <div class="bank-info">🍀 BANK NADĚJE: <span id="uiBankNadeje">0</span> Kč</div>
-        <div class="bank-info">💰 CELKEM V OBĚHU: <span id="uiCelkovyVklad">0</span> Kč</div>
+        <div class="bank-stat">🍀 BANK NADĚJE: <span id="uiBankNadeje">0</span> Kč</div>
+        <div class="bank-stat">💰 CELKEM V OBĚHU: <span id="uiCelkovyVklad">0</span> Kč</div>
     </div>
 
     <div id="userWelcome">HRÁČ: ---</div>
 
-    <div id="matchList">Načítám zápasy...</div>
+    <div id="matchList"> Načítám arénu... 🏒</div>
 
     <div id="fabCart" style="display:none;" onclick="window.uiOpenCart()">
-        <span class="cart-icon">🛒</span>
+        <span class="cart-img">🛒</span>
         <span id="fabBadge">0</span>
     </div>
 
     <div id="adminBtn" style="display:none;" onclick="window.location.href='admin.html'">⚙️</div>
 
-    <div id="loginOverlay">
+    <div id="loginOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:9999; align-items:center; justify-content:center;">
         <div style="text-align:center;">
-            <h2 style="color:var(--neon); text-shadow: 0 0 10px var(--neon);">KDO JSI?</h2>
-            <input type="text" id="loginName" style="padding:15px; border-radius:15px; border:none; width:200px; text-align:center;">
+            <h2 style="color:var(--neon); text-shadow: 0 0 20px var(--neon); font-size: 2em;">VSTUP DO HRY</h2>
+            <input type="text" id="loginName" placeholder="Tvé jméno" style="padding:18px; border-radius:20px; border:none; width:250px; text-align:center; font-size:1.2em; background:#111; color:white; border:1px solid var(--neon);">
             <br><br>
-            <button id="loginBtn" style="padding:15px 40px; background:var(--neon); border:none; border-radius:15px; font-weight:900;">VSTOUPIT</button>
+            <button id="loginBtn" style="padding:18px 50px; background:var(--neon); border:none; border-radius:20px; font-weight:900; font-size:1.1em; cursor:pointer; box-shadow: 0 0 20px var(--neon);">POTVRDIT</button>
         </div>
     </div>
 
@@ -195,12 +204,17 @@
             if(["Pepa", "Admin2"].includes(user.name)) document.getElementById('adminBtn').style.display = 'block';
         }
 
-        // Start
-        EconomyService.init();
+        // Spuštění všeho
+        EconomyService.init(); 
         DBService.getMatches(zapasy => {
             UIRenderer.renderMatches(zapasy, 'matchList', user?.id, user, activeDeadlines);
+            // Pokud jsou v košíku věci, ukážeme fab
+            if (Object.keys(window.localCart || {}).length > 0) document.getElementById('fabCart').style.display = 'flex';
         });
         UIRenderer.startClock(activeDeadlines);
+
+        // Aby fungovalo otevírání košíku z window
+        window.uiOpenCart = () => { /* tvoje logika košíku */ alert("Otevírám košík..."); };
     </script>
 </body>
 </html>
