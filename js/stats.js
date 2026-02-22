@@ -1,4 +1,4 @@
-const vsechnyStaty = [
+window.vsechnyStaty = [
     // EVROPA
     { n: "Česko", c: "cz" }, { n: "Slovensko", c: "sk" }, { n: "Německo", c: "de" },
     { n: "Rakousko", c: "at" }, { n: "Švýcarsko", c: "ch" }, { n: "Francie", c: "fr" },
