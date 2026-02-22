@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v5.1</title>
+    <title>KANCELÁŘ NADĚJE v5.3</title>
 
     <meta name="apple-mobile-web-app-title" content="Naděje v2">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -47,20 +47,27 @@
         
         @keyframes neonGlow { 0% { filter: drop-shadow(0 0 5px var(--neon)); transform: scale(1); } 100% { filter: drop-shadow(0 0 25px var(--neon)); transform: scale(1.02); } }
         
-        /* NOVÝ BANK BOX SYSTÉM */
+        /* BANK BOX SYSTÉM */
         .bank-container { width: 100%; max-width: 450px; margin-bottom: 40px; }
         .bank-box { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 35px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
         .bank-main-val { font-size: 2.8em; font-weight: 900; color: #fff; margin-bottom: 5px; }
         .bank-nadeje-box { background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); border-radius: 25px; padding: 20px; margin-top: 15px; position: relative; overflow: hidden; }
         .bank-nadeje-val { font-size: 3.2em; font-weight: 900; text-shadow: 0 0 20px var(--neon); color: #fff; }
 
+        /* Navigace */
         .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -20px auto 30px auto; justify-content: center; }
         .nav-btn { flex: 1; padding: 15px 5px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; text-decoration: none; color: #fff; font-size: 0.7em; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-fast); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
         .nav-btn:hover { border-color: var(--neon); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,242,255,0.1); }
 
-        .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); position: relative; backdrop-filter: blur(15px); width: 90%; max-width: 450px; }
-        .vs-circle { background: var(--neon); color: var(--dark); border-radius: 50%; width: 50px; height: 50px; line-height: 50px; font-weight: 900; }
-        .score-input { width: 85px; height: 75px; text-align: center; font-weight: 900; font-size: 2.2em; background: #000; border: 3px solid #334155; color: #fff; border-radius: 22px; }
+        /* FIX VLAJEK - VŽDY VEDLE SEBE */
+        .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); position: relative; backdrop-filter: blur(15px); width: 90%; max-width: 450px; box-sizing: border-box; }
+        .flags-wrapper { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 25px 0; flex-wrap: nowrap !important; width: 100%; }
+        .flag-container { flex: 1; min-width: 0; }
+        .flag-img { width: 100%; max-width: 100px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: flagWave 3s ease-in-out infinite; transform-origin: left center; }
+        @keyframes flagWave { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(25deg) scale(1.03); } }
+        
+        .vs-circle { background: var(--neon); color: var(--dark); border-radius: 50%; width: 45px; height: 45px; line-height: 45px; font-weight: 900; flex-shrink: 0; font-size: 0.9em; }
+        .score-input { width: 75px; height: 65px; text-align: center; font-weight: 900; font-size: 1.8em; background: #000; border: 3px solid #334155; color: #fff; border-radius: 18px; }
         .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; }
         .btn-add-ticket { width: 100%; background: var(--neon); color: var(--dark); border: none; padding: 22px; border-radius: 20px; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         
@@ -143,13 +150,12 @@
             document.getElementById('userWelcome').innerText = `HRÁČ: ${user.name.toUpperCase()}`;
         }
 
-        // --- NAČÍTÁNÍ BANKŮ (Nadeje Logic) ---
+        // --- NAČÍTÁNÍ BANKŮ (Ekonomika 15/5) ---
         firebase.database().ref('sazkyData_v2').on('value', snap => {
             const data = snap.val() || {};
             const prevedeno = parseInt(data.prevedenyBank) || 0;
             const bankNadeje = parseInt(data.bankNadeje) || 0;
             
-            // Výpočet aktuálního banku (Převedeno + sázky aktivních zápasů * 15)
             let extraToday = 0;
             if (data.zapasy) {
                 Object.values(data.zapasy).forEach(m => {
@@ -163,7 +169,6 @@
             document.getElementById('uiBankNadeje').innerText = bankNadeje.toLocaleString();
         });
 
-        // --- ZBYTEK LOGIKY ZÁPASŮ ---
         DBService.getMatches(zapasy => {
             const container = document.getElementById('matchList');
             container.innerHTML = "";
@@ -185,9 +190,9 @@
                         ${isEvaluated ? `<div style="background:#27ae60; padding:5px 15px; border-radius:100px; font-size:0.8em;">VÝSLEDEK ${m.vysledek}</div>` : `<div id="timer-${id}" class="timer-box" style="color:var(--neon); font-weight:bold;">--:--:--</div>`}
                     </div>
                     <div class="flags-wrapper">
-                        <div class="flag-container"><img class="flag-img" src="https://flagcdn.com/w160/${m.kodD}.png"><br><small>${m.domaci}</small></div>
+                        <div class="flag-container"><img class="flag-img" src="https://flagcdn.com/w160/${m.kodD}.png"><br><small style="font-size:0.7em;">${m.domaci}</small></div>
                         <div class="vs-circle">VS</div>
-                        <div class="flag-container"><img class="flag-img" src="https://flagcdn.com/w160/${m.kodH}.png"><br><small>${m.hoste}</small></div>
+                        <div class="flag-container"><img class="flag-img" src="https://flagcdn.com/w160/${m.kodH}.png"><br><small style="font-size:0.7em;">${m.hoste}</small></div>
                     </div>
                     <div id="detail-${id}" class="details" style="display:none; margin-top:25px; padding-top:25px; border-top:1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation()">
                         ${(!isClosed && !isEvaluated) ? `
@@ -229,6 +234,7 @@
             localCart[id] = { tip: `${sD}:${sH}`, strelec: str, matchName: mName };
             document.getElementById('fabCart').style.display = 'flex';
             document.getElementById('fabBadge').innerText = Object.keys(localCart).length;
+            alert("Přidáno na tiket.");
         };
 
         window.uiOpenCart = () => {
@@ -272,6 +278,5 @@
             });
         }, 1000);
     </script>
-    <script src="js/notifications.js"></script>
 </body>
 </html>
