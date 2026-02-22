@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin v2.7 - KANCELÁŘ NADĚJE</title>
+    <title>Admin v2.8 - KANCELÁŘ NADĚJE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -32,7 +32,6 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 2999; }
         #statusMsg { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 15px 30px; border-radius: 50px; font-weight: bold; z-index: 9999; box-shadow: 0 0 20px var(--blue); }
         
-        /* Styl pro zamknuté vstupy */
         input:disabled { opacity: 0.5; border: 1px dashed #555; cursor: not-allowed; color: #aaa; }
     </style>
 </head>
@@ -54,10 +53,15 @@
                 <button class="btn btn-blue" onclick="saveBank('prevedenyBank', 'prevBankInput')">Uložit převod</button>
             </div>
             <div>
-                <label>Bank Naděje (Jackpot):</label>
-                <input type="number" id="nadejeBankInput" placeholder="0">
-                <button class="btn btn-blue" onclick="saveBank('bankNadeje', 'nadejeBankInput')">Uložit jackpot</button>
+                <label>V oběhu celkem (Pokladna):</label>
+                <input type="number" id="vOběhuInput" placeholder="0">
+                <button class="btn btn-blue" onclick="saveBank('vOběhuCelkem', 'vOběhuInput')">Uložit pokladnu</button>
             </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <label>Bank Naděje (Jackpot):</label>
+            <input type="number" id="nadejeBankInput" placeholder="0">
+            <button class="btn btn-blue" onclick="saveBank('bankNadeje', 'nadejeBankInput')">Uložit jackpot</button>
         </div>
     </div>
 
@@ -91,13 +95,13 @@
         <span style="font-size:1.5em; line-height:2;">:</span>
         <input type="number" id="finalH" style="width:70px; text-align:center; font-size:1.5em;">
     </div>
-    <label>Střelci zápasu:</label>
+    <label>Střelci zápasu (Livesport):</label>
     <div id="finalStrelci" class="tag-container"></div>
     <div style="display:flex; gap:10px;">
         <input type="text" id="addStrelecInput" placeholder="Jméno střelce..." style="margin:0;">
         <button class="btn btn-blue" style="width:auto; margin:0; padding:0 20px;" onclick="addManualTag()">+</button>
     </div>
-    <button class="btn btn-green" id="confirmEvalBtn">VYPLATIT (15/5)</button>
+    <button class="btn btn-green" id="confirmEvalBtn">VYPLATIT VÝHRY (15 Kč/sázka)</button>
 </div>
 
 <script>
@@ -115,7 +119,6 @@
     
     let currentStrelci = [];
 
-    // --- WEBPUSHR LOGIKA ---
     async function sendPush(title, msg, scheduledDate = null) {
         const key = "082b774147872e56c9f183c31d86c0a8";
         const token = "119028";
@@ -144,7 +147,6 @@
         } catch(e) { console.error("Push error:", e); }
     }
 
-    // --- SPRÁVA BANKŮ ---
     function saveBank(path, inputId) {
         const val = parseInt(document.getElementById(inputId).value) || 0;
         db.ref('sazkyData_v2/' + path).set(val).then(() => {
@@ -154,8 +156,8 @@
 
     db.ref('sazkyData_v2/prevedenyBank').on('value', s => document.getElementById('prevBankInput').value = s.val() || 0);
     db.ref('sazkyData_v2/bankNadeje').on('value', s => document.getElementById('nadejeBankInput').value = s.val() || 0);
+    db.ref('sazkyData_v2/vOběhuCelkem').on('value', s => document.getElementById('vOběhuInput').value = s.val() || 0);
 
-    // --- SPRÁVA SÁZEK ---
     async function togglePaid(mid, bid, current) {
         await db.ref(`sazkyData_v2/zapasy/${mid}/sazky/${bid}`).update({ zaplaceno: !current });
     }
@@ -167,7 +169,6 @@
         showStatus("Sázka upravena! 💾");
     }
 
-    // --- ZOBRAZENÍ ---
     db.ref('sazkyData_v2/zapasy').on('value', snap => {
         const aC = document.getElementById('activeMatches'), hC = document.getElementById('historyMatches');
         aC.innerHTML = ""; hC.innerHTML = "";
@@ -180,7 +181,7 @@
             if (m.sazky) {
                 Object.entries(m.sazky).forEach(([bid, s]) => {
                     const isPaid = s.zaplaceno || false;
-                    const isEvaluated = m.status === "vyhodnoceno"; // <--- Kontrola zamknutí
+                    const isEvaluated = m.status === "vyhodnoceno";
 
                     betsHtml += `
                         <div class="bet-row">
@@ -195,7 +196,6 @@
                             <input type="text" id="editStr-${mid}-${bid}" value="${s.strelec}" 
                                    ${isEvaluated ? 'disabled' : ''} 
                                    style="width:80px; margin:0; padding:5px; font-size:0.8em;">
-                            
                             ${!isEvaluated ? `<button onclick="updateBet('${mid}','${bid}')" style="background:none; border:none; cursor:pointer;">💾</button>` : ''}
                         </div>
                     `;
@@ -220,7 +220,6 @@
         });
     });
 
-    // --- VYHODNOCENÍ ---
     function startEval(mid) {
         const raw = document.getElementById(`raw-${mid}`).value; if(!raw) return alert("Vlož text!");
         let clean = raw.split(/PRODLOUŽENÍ|PENALTY|NÁJEZDY/i)[0];
@@ -252,13 +251,12 @@
             const z = data.zapasy[mid];
             const sazkyEntries = Object.entries(z.sazky || {});
             
+            // --- EKONOMIKA 15/5 ---
             const pocetSazek = sazkyEntries.length;
             const doDenníhoBanku = pocetSazek * 15;
-            const doBankuNadeje = pocetSazek * 5;
-            
             const rollover = parseInt(data.prevedenyBank) || 0;
             const totalDailyPool = doDenníhoBanku + rollover;
-            const currentNadeje = parseInt(data.bankNadeje) || 0;
+            const currentOběh = parseInt(data.vOběhuCelkem) || 0;
 
             let winS = sazkyEntries.filter(([id, s]) => {
                 const p = s.tip.split(':');
@@ -268,6 +266,9 @@
             
             let finalWinners = winB.length > 0 ? winB : winS;
             const idVyhercuBanku = finalWinners.map(item => item[0]);
+            
+            // Kolik se celkem vyplácí
+            const totalToPayout = finalWinners.length > 0 ? totalDailyPool : 0;
             const share = finalWinners.length > 0 ? Math.floor(totalDailyPool / finalWinners.length) : 0;
             
             const updates = {};
@@ -300,38 +301,42 @@
                 });
             });
 
+            // LOGIKA PŘELÉVÁNÍ A ODČÍTÁNÍ Z OBĚHU
             updates[`sazkyData_v2/prevedenyBank`] = finalWinners.length > 0 ? 0 : totalDailyPool;
-            // Poznámka: bankNadeje se už přičítá hned při odeslání sázky v indexu
+            
+            // POKUD SE VYPLÁCELO, ODEČTEME TO Z CELKOVÉHO OBĚHU
+            if (totalToPayout > 0) {
+                updates[`sazkyData_v2/vOběhuCelkem`] = Math.max(0, currentOběh - totalToPayout);
+            }
+
             updates[`sazkyData_v2/zapasy/${mid}/status`] = "vyhodnoceno";
             updates[`sazkyData_v2/zapasy/${mid}/vysledek`] = `${d}:${h}`;
             updates[`sazkyData_v2/zapasy/${mid}/strelciZapasu`] = currentStrelci;
 
             await db.ref().update(updates);
             
-            showStatus("Vyhodnoceno a notifikace odeslána! 🚀");
+            showStatus("Zápas vyhodnocen a výhry odečteny! 🚀");
             await sendPush("Zápas vyhodnocen! 🏁", `${z.domaci} - ${z.hoste} skončilo ${d}:${h}. Koukni na body!`);
-            
             closeModal();
         });
     }
 
     async function publishMatch() {
-        const d = document.getElementById('d').value, h = document.getElementById('h').value,
+        const dVal = document.getElementById('d').value, hVal = document.getElementById('h').value,
               kd = document.getElementById('kd').value, kh = document.getElementById('kh').value, dl = document.getElementById('dl').value;
-        if(!d || !h || !dl) return alert("Vyplň vše!");
+        if(!dVal || !hVal || !dl) return alert("Vyplň vše!");
         
         const matchRef = db.ref('sazkyData_v2/zapasy').push();
-        await matchRef.set({ domaci: d, hoste: h, kodD: kd, kodH: kh, deadline: dl, status: "aktivni" });
+        await matchRef.set({ domaci: dVal, hoste: hVal, kodD: kd, kodH: kh, deadline: dl, status: "aktivni" });
         
-        showStatus("Publikováno a notifikace odeslány! ✅");
-        await sendPush("Nový zápas vypsán! 🏒", `${d} vs ${h}. Vsaď si včas!`);
+        showStatus("Publikováno! ✅");
+        await sendPush("Nový zápas vypsán! 🏒", `${dVal} vs ${hVal}. Vsaď si včas!`);
 
         const deadlineDate = new Date(dl);
         const reminderDate = new Date(deadlineDate.getTime() - (30 * 60000));
         if (reminderDate > new Date()) {
-            await sendPush("Poslední šance vsadit! ⏳", `Sázky na ${d} - ${h} končí za 30 minut!`, reminderDate);
+            await sendPush("Poslední šance vsadit! ⏳", `Sázky na ${dVal} - ${hVal} končí za 30 minut!`, reminderDate);
         }
-
         setTimeout(() => location.reload(), 1500);
     }
 
@@ -357,8 +362,7 @@
 
     function showStatus(text) {
         const msg = document.getElementById('statusMsg'); 
-        msg.innerText = text; 
-        msg.style.display = 'block';
+        msg.innerText = text; msg.style.display = 'block';
         setTimeout(() => msg.style.display = 'none', 3500);
     }
 
