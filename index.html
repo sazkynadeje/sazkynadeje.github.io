@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v5.7</title>
+    <title>KANCELÁŘ NADĚJE v6.0</title>
 
     <meta name="apple-mobile-web-app-title" content="Naděje v2">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -42,16 +42,23 @@
         
         .admin-lock { position: fixed; top: 20px; right: 20px; width: 48px; height: 48px; background: rgba(15, 23, 42, 0.9); border: 2px solid var(--neon); border-radius: 50%; display: none; align-items: center; justify-content: center; text-decoration: none; font-size: 1.3em; z-index: 9999; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); backdrop-filter: blur(10px); }
         
-        .header-logo { max-width: 450px; width: 90%; margin: 20px 0 40px 0; filter: drop-shadow(0 0 10px var(--neon)); animation: neonGlow 4s ease-in-out infinite alternate; }
+        .header-logo { max-width: 450px; width: 90%; margin: 20px 0 30px 0; filter: drop-shadow(0 0 10px var(--neon)); animation: neonGlow 4s ease-in-out infinite alternate; }
         @keyframes neonGlow { 0% { filter: drop-shadow(0 0 5px var(--neon)); transform: scale(1); } 100% { filter: drop-shadow(0 0 25px var(--neon)); transform: scale(1.02); } }
         
-        .bank-container { width: 100%; max-width: 450px; margin-bottom: 40px; }
+        .bank-container { width: 100%; max-width: 450px; margin-bottom: 30px; }
         .bank-box { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 35px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
-        .bank-main-val { font-size: 2.8em; font-weight: 900; color: #fff; margin-bottom: 5px; }
-        .bank-nadeje-box { background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); border-radius: 25px; padding: 20px; margin-top: 15px; position: relative; overflow: hidden; }
-        .bank-nadeje-val { font-size: 3.2em; font-weight: 900; text-shadow: 0 0 20px var(--neon); color: #fff; }
+        .bank-main-val { font-size: 2.5em; font-weight: 900; color: #fff; margin-bottom: 5px; }
+        
+        /* Spodní banky - Naděje a Pokladna */
+        .sub-banks-row { display: flex; gap: 12px; margin-top: 20px; }
+        .sub-bank-box { flex: 1; background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); border-radius: 25px; padding: 15px; position: relative; overflow: hidden; }
+        .sub-bank-label { display: block; font-size: 0.6em; font-weight: 900; text-transform: uppercase; color: var(--neon); letter-spacing: 1px; margin-bottom: 5px; }
+        .sub-bank-val { font-size: 1.6em; font-weight: 900; text-shadow: 0 0 10px var(--neon); color: #fff; }
+        .box-white { border-color: #fff; background: rgba(255,255,255,0.05); }
+        .box-white .sub-bank-label { color: #fff; opacity: 0.7; }
+        .box-white .sub-bank-val { text-shadow: none; }
 
-        .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -20px auto 30px auto; }
+        .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -10px auto 30px auto; }
         .nav-btn { flex: 1; padding: 15px 5px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; text-decoration: none; color: #fff; font-size: 0.7em; font-weight: 900; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
         .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); width: 90%; max-width: 450px; box-sizing: border-box; }
@@ -67,7 +74,6 @@
         .fab-cart { position: fixed; bottom: 35px; right: 35px; width: 75px; height: 75px; background: var(--neon); color: var(--dark); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 2em; z-index: 5000; box-shadow: 0 15px 40px rgba(0, 242, 255, 0.4); }
         #cartModal { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 520px; background: #1e293b; border: 2px solid var(--neon); border-radius: 40px; padding: 35px; display: none; z-index: 9999; box-shadow: 0 0 100px rgba(0,0,0,0.9); max-height: 85vh; overflow-y: auto; }
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 50000; display: none; align-items: center; justify-content: center; }
-
         .btn-download { display: block; background: #ffffff; color: #000; padding: 18px; border-radius: 20px; text-decoration: none; font-weight: 900; margin-top: 20px; font-size: 0.9em; border: none; width: 100%; cursor: pointer; }
     </style>
 </head>
@@ -86,14 +92,21 @@
 
     <div class="bank-container">
         <div class="bank-box">
-            <span style="font-size:0.7em; opacity:0.6; text-transform:uppercase;">Maximální výhra dnes</span>
+            <span style="font-size:0.7em; opacity:0.6; text-transform:uppercase; letter-spacing: 1px;">Maximální výhra dnes</span>
             <div class="bank-main-val"><span id="uiMainBank">0</span> Kč</div>
             
-            <div class="bank-nadeje-box">
-                <span style="color:var(--neon); font-size:0.8em; font-weight:900; text-transform:uppercase;">Bank Naděje 2026</span>
-                <div class="bank-nadeje-val"><span id="uiBankNadeje">0</span><small style="font-size:0.4em; margin-left:5px;">Kč</small></div>
+            <div class="sub-banks-row">
+                <div class="sub-bank-box">
+                    <span class="sub-bank-label">Bank Naděje</span>
+                    <div class="sub-bank-val"><span id="uiBankNadeje">0</span><small style="font-size:0.5em; margin-left:3px;">Kč</small></div>
+                </div>
+                <div class="sub-bank-box box-white">
+                    <span class="sub-bank-label">V oběhu celkem</span>
+                    <div class="sub-bank-val"><span id="uiCelkovyVklad">0</span><small style="font-size:0.5em; margin-left:3px;">Kč</small></div>
+                </div>
             </div>
-            <div id="userWelcome" style="margin-top:20px; color:var(--neon); font-weight:bold;"></div>
+
+            <div id="userWelcome" style="margin-top:20px; color:var(--neon); font-weight:bold; font-size: 0.9em; letter-spacing: 1px;"></div>
         </div>
     </div>
 
@@ -155,18 +168,28 @@
             if(ALLOWED_ADMINS.includes(user.name)) document.getElementById('adminBtn').style.display = 'flex';
         }
 
+        // --- DYNAMICKÝ VÝPOČET TŘÍ BANKŮ ---
         firebase.database().ref('sazkyData_v2').on('value', snap => {
             const data = snap.val() || {};
             const prev = parseInt(data.prevedenyBank) || 0;
             const jack = parseInt(data.bankNadeje) || 0;
+            const obehrano = parseInt(data.vOběhuCelkem) || 0;
             let dailyExtra = 0;
+            
             if (data.zapasy) {
-                Object.values(data.zapasy).forEach(m => {
-                    if (m.status === "aktivni" && m.sazky) dailyExtra += (Object.keys(m.sazky).length * 15);
-                });
+                // Filtrujeme pouze aktivní zápasy a řadíme podle deadline
+                const aktivni = Object.values(data.zapasy)
+                    .filter(m => m.status === "aktivni")
+                    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+                // Denní bank: Jen 15 Kč z toho NEJBLIŽŠÍHO zápasu + přelito
+                if (aktivni.length > 0 && aktivni[0].sazky) {
+                    dailyExtra = Object.keys(aktivni[0].sazky).length * 15;
+                }
             }
             document.getElementById('uiMainBank').innerText = (prev + dailyExtra).toLocaleString();
             document.getElementById('uiBankNadeje').innerText = jack.toLocaleString();
+            document.getElementById('uiCelkovyVklad').innerText = obehrano.toLocaleString();
         });
 
         DBService.getMatches(zapasy => {
@@ -178,8 +201,6 @@
                 activeDeadlines[id] = m.deadline;
                 const isEval = m.status === "vyhodnoceno";
                 const isClosed = Date.now() > new Date(m.deadline).getTime();
-                
-                // Kontrola, zda uživatel již vsadil
                 const userHasBet = m.sazky && Object.values(m.sazky).some(s => s.userId === uId || s.jmeno === user.name);
 
                 const card = document.createElement('div');
@@ -224,10 +245,7 @@
         window.actionAdd = (id, mName) => {
             const sD = document.getElementById(`scD-${id}`).value, sH = document.getElementById(`scH-${id}`).value, str = document.getElementById(`str-${id}`).value;
             if(sD==="" || sH==="" || !str) return alert("Doplň tip!");
-            
-            // Ošetření přepsání v košíku (jeden zápas = jeden tip)
             localCart[id] = { tip: `${sD}:${sH}`, strelec: str, matchName: mName };
-            
             document.getElementById('fabCart').style.display='flex';
             document.getElementById('fabBadge').innerText = Object.keys(localCart).length;
             alert("Přidáno na tiket.");
@@ -271,9 +289,10 @@
             };
 
             try {
-                // Přičtení do Banku Naděje hned při odeslání (přesná logika 5 Kč / zápas)
-                const nadejeRef = firebase.database().ref('sazkyData_v2/bankNadeje');
-                await nadejeRef.transaction(curr => (curr || 0) + (uniqueMatchCount * 5));
+                // Přičtení do Banku Naděje (5 Kč/zápas) a Celkového oběhu (20 Kč/zápas)
+                const dbRef = firebase.database().ref('sazkyData_v2');
+                await dbRef.child('bankNadeje').transaction(curr => (curr || 0) + (uniqueMatchCount * 5));
+                await dbRef.child('vOběhuCelkem').transaction(curr => (curr || 0) + (uniqueMatchCount * 20));
 
                 await DBService.sendTicket(localCart);
                 
