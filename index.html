@@ -3,59 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v5.2</title>
+    <title>KANCELÁŘ NADĚJE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
-    <link rel="stylesheet" href="style.css"> 
-    </head>
+    <style>
+        :root {
+            --neon: #00f2ff;
+            --bg: #0b0f1a;
+            --card-bg: rgba(30, 41, 59, 0.4);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* HLAVIČKA JAKO NA OBRÁZKU */
+        .header-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 10px;
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .logo-text {
+            color: var(--neon);
+            font-weight: 900;
+            font-size: 1.6em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px var(--neon);
+            margin: 0;
+        }
+
+        .bank-info {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin: 5px 0;
+            color: var(--neon);
+            text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+        }
+
+        #userWelcome {
+            color: var(--neon);
+            font-weight: 900;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon);
+            margin: 40px 0;
+            letter-spacing: 2px;
+        }
+
+        /* NEONOVÉ TLAČÍKO KOŠÍKU UPROSTŘED */
+        #fabCart {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--neon);
+            width: 140px;
+            height: 55px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px var(--neon);
+            cursor: pointer;
+            z-index: 1000;
+            border: none;
+        }
+
+        .cart-icon {
+            font-size: 24px;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+        }
+
+        #fabBadge {
+            position: absolute;
+            top: -8px;
+            right: 40px;
+            background: #ff4444;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 900;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+            border: 2px solid var(--bg);
+        }
+
+        /* ADMIN OZUBENÉ KOLEČKO */
+        #adminBtn {
+            position: fixed;
+            bottom: 50px;
+            left: 15%;
+            font-size: 24px;
+            opacity: 0.5;
+            cursor: pointer;
+            filter: drop-shadow(0 0 5px var(--neon));
+            transition: 0.3s;
+        }
+
+        #adminBtn:hover { opacity: 1; }
+
+        /* ZÁPASY */
+        #matchList { width: 100%; max-width: 400px; }
+        
+        .match-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* LOGIN OVERLAY */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            display: none; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
 <body>
 
-    <div class="bank-header">
-        <div class="bank-item">🏦 DNES HRAJEME O: <span id="uiMainBank">0</span> Kč</div>
-        <div class="bank-item">🍀 BANK NADĚJE: <span id="uiBankNadeje">0</span> Kč</div>
-        <div class="bank-item">💰 CELKEM V OBĚHU: <span id="uiCelkovyVklad">0</span> Kč</div>
-    </div>
-
-    <div id="userWelcome" style="text-align:center; font-weight:900; color:var(--neon); margin: 20px 0;"></div>
-
-    <div id="matchList" class="container">Načítám zápasy...</div>
-
-    <div id="fabCart" style="display:none; position:fixed; bottom:30px; right:30px; background:var(--neon); color:#000; width:65px; height:65px; border-radius:50%; align-items:center; justify-content:center; font-weight:900; cursor:pointer; z-index:1000; box-shadow: 0 0 20px var(--neon);" onclick="window.uiOpenCart()">
-        🛒 <span id="fabBadge" style="position:absolute; top:0; right:0; background:red; color:white; border-radius:50%; padding:2px 7px; font-size:12px;">0</span>
-    </div>
-
-    <div id="adminBtn" style="display:none; position:fixed; bottom:30px; left:30px; background:#fff; color:#000; width:50px; height:50px; border-radius:50%; align-items:center; justify-content:center; cursor:pointer; z-index:1000;" onclick="window.location.href='admin.html'">⚙️</div>
-
-    <div id="loginOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
-        <div style="background:#1e293b; padding:40px; border-radius:30px; text-align:center; border:2px solid var(--neon); max-width:320px; width:90%;">
-            <h2 style="color:var(--neon); margin-bottom:20px;">KANCELÁŘ NADĚJE</h2>
-            <input type="text" id="loginName" placeholder="Zadej své jméno" style="width:100%; padding:15px; border-radius:15px; border:none; margin-bottom:20px; text-align:center; font-size:1.1em;">
-            <button id="loginBtn" style="width:100%; padding:15px; border-radius:15px; border:none; background:var(--neon); color:#000; font-weight:900; cursor:pointer;">VSTOUPIT DO HRY</button>
+    <div class="header-container">
+        <div class="logo-row">
+            <span style="font-size: 2em;">🏛️</span>
+            <h1 class="logo-text">KANCELÁŘ NADĚJE</h1>
         </div>
+        <div class="bank-info">🍀 BANK NADĚJE: <span id="uiBankNadeje">0</span> Kč</div>
+        <div class="bank-info">💰 CELKEM V OBĚHU: <span id="uiCelkovyVklad">0</span> Kč</div>
     </div>
 
-    <div id="cartModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div id="cartPre">
-                <h2 style="color:var(--neon);">TVŮJ TIKET</h2>
-                <div id="cartItemsContainer"></div>
-                <div style="margin: 20px 0; font-weight:900; font-size:1.2em;">CELKEM: <span id="uiCartTotal">0 Kč</span></div>
-                <button class="btn-confirm" onclick="window.actionSendTicket()" style="background:var(--neon); color:#000; width:100%; padding:20px; border-radius:20px; font-weight:900; border:none;">POTVRDIT A ZAPLATIT</button>
-                <button onclick="window.uiCloseCart()" style="background:none; border:none; color:white; margin-top:15px; cursor:pointer; opacity:0.5;">ZRUŠIT</button>
-            </div>
-            <div id="cartPost" style="display:none;">
-                <h2 style="color:var(--neon);">POSLEDNÍ KROK! 📲</h2>
-                <p>Nyní naskenuj QR kód a odešli platbu.</p>
-                <img id="uiQrImage" style="width:250px; height:250px; background:white; border-radius:20px; padding:10px; margin:20px 0;">
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px;">
-                    Částka: <strong id="uiPayPrice"></strong><br>
-                    Zpráva: <strong id="uiPayMsg"></strong>
-                </div>
-                <button id="btnDownloadQR" class="btn-confirm" style="margin-top:15px; background:#fff; color:#000;">ULOŽIT QR KÓD</button>
-                <button onclick="window.location.reload()" style="background:var(--neon); color:#000; width:100%; padding:20px; border-radius:20px; font-weight:900; border:none; margin-top:10px;">MÁM ZAPLACENO ✅</button>
-            </div>
+    <div id="userWelcome">HRÁČ: ---</div>
+
+    <div id="matchList">Načítám zápasy...</div>
+
+    <div id="fabCart" style="display:none;" onclick="window.uiOpenCart()">
+        <span class="cart-icon">🛒</span>
+        <span id="fabBadge">0</span>
+    </div>
+
+    <div id="adminBtn" style="display:none;" onclick="window.location.href='admin.html'">⚙️</div>
+
+    <div id="loginOverlay">
+        <div style="text-align:center;">
+            <h2 style="color:var(--neon); text-shadow: 0 0 10px var(--neon);">KDO JSI?</h2>
+            <input type="text" id="loginName" style="padding:15px; border-radius:15px; border:none; width:200px; text-align:center;">
+            <br><br>
+            <button id="loginBtn" style="padding:15px 40px; background:var(--neon); border:none; border-radius:15px; font-weight:900;">VSTOUPIT</button>
         </div>
     </div>
 
@@ -67,101 +180,27 @@
         import { DBService } from './js/database.js';
         import { EconomyService } from './js/economy.js';
         import { UIRenderer } from './js/ui-render.js';
-        import { Utils } from './js/utils.js';
 
-        let localCart = {};
         let activeDeadlines = {};
-        const ALLOWED_ADMINS = ["Pepa", "Admin2"];
-
         const user = AuthService.getUser();
-        const uId = user ? user.name.toLowerCase().replace(/\s/g, '') : null;
 
-        // Login logika
         if (!user) {
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('loginBtn').onclick = () => {
                 const name = document.getElementById('loginName').value.trim();
-                if (name) { 
-                    AuthService.setUser(name); 
-                    location.reload(); 
-                }
+                if (name) { AuthService.setUser(name); location.reload(); }
             };
         } else {
             document.getElementById('userWelcome').innerText = `HRÁČ: ${user.name.toUpperCase()}`;
-            if(ALLOWED_ADMINS.includes(user.name)) {
-                document.getElementById('adminBtn').style.display = 'flex';
-            }
+            if(["Pepa", "Admin2"].includes(user.name)) document.getElementById('adminBtn').style.display = 'block';
         }
 
-        // SPUŠTĚNÍ MODULŮ
-        EconomyService.init(); 
-        UIRenderer.startClock(activeDeadlines);
-
+        // Start
+        EconomyService.init();
         DBService.getMatches(zapasy => {
-            UIRenderer.renderMatches(zapasy, 'matchList', uId, user, activeDeadlines);
+            UIRenderer.renderMatches(zapasy, 'matchList', user?.id, user, activeDeadlines);
         });
-
-        // Globální funkce (přístupné z HTML)
-        window.actionAdd = (id, mName) => {
-            const sD = document.getElementById(`scD-${id}`).value, 
-                  sH = document.getElementById(`scH-${id}`).value, 
-                  str = document.getElementById(`str-${id}`).value;
-            
-            if(sD==="" || sH==="" || !str) return alert("Doplň tip!");
-            
-            localCart[id] = { tip: `${sD}:${sH}`, strelec: str, matchName: mName };
-            document.getElementById('fabCart').style.display='flex';
-            document.getElementById('fabBadge').innerText = Object.keys(localCart).length;
-            alert("Přidáno na tiket.");
-        };
-
-        window.uiOpenCart = () => {
-            const container = document.getElementById('cartItemsContainer'); 
-            container.innerHTML = "";
-            let sum = Object.keys(localCart).length * 20;
-            
-            Object.entries(localCart).forEach(([id, d]) => {
-                container.innerHTML += `<div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:10px; text-align:left; border-left:4px solid var(--neon);"><small style="opacity:0.5;">${d.matchName}</small><br><b>${d.tip}</b> — ${d.strelec}</div>`;
-            });
-            
-            document.getElementById('uiCartTotal').innerText = `${sum} Kč`;
-            document.getElementById('cartPre').style.display = 'block';
-            document.getElementById('cartPost').style.display = 'none';
-            document.getElementById('cartModal').style.display = 'block';
-        };
-
-        window.uiCloseCart = () => {
-            document.getElementById('cartModal').style.display = 'none';
-        };
-
-        window.actionSendTicket = async () => {
-            const count = Object.keys(localCart).length;
-            if (count === 0) return;
-            
-            const sum = count * 20;
-            const qrUrl = Utils.getQrUrl(sum, user.name);
-            const msg = `Sazka_${user.name}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-            document.getElementById('uiQrImage').src = qrUrl;
-            document.getElementById('uiPayPrice').innerText = `${sum} Kč`;
-            document.getElementById('uiPayMsg').innerText = msg;
-
-            try {
-                // Peněžní transakce
-                await db.ref('sazkyData_v2/bankNadeje').transaction(curr => (curr || 0) + (count * 5));
-                await db.ref('sazkyData_v2/vOběhuCelkem').transaction(curr => (curr || 0) + (count * 20));
-                
-                // Odeslání sázek přes DBService
-                await DBService.sendTicket(localCart);
-                
-                document.getElementById('cartPre').style.display = 'none';
-                document.getElementById('cartPost').style.display = 'block';
-                localCart = {};
-                document.getElementById('fabCart').style.display = 'none';
-            } catch(e) { 
-                alert("Chyba při odesílání: " + e.message); 
-            }
-        };
+        UIRenderer.startClock(activeDeadlines);
     </script>
 </body>
 </html>
