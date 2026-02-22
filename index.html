@@ -21,11 +21,12 @@
         });
     </script>
     <script src="stats.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        /* --- TVŮJ ORIGINÁLNÍ DESIGN --- */
+        /* --- ZÁKLADNÍ NASTAVENÍ A PROMĚNNÉ --- */
         :root {
             --neon: #00f2ff;
             --dark: #0f172a;
@@ -49,6 +50,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* --- FIXNÍ PRVKY --- */
         .admin-lock {
             position: fixed;
             top: 20px;
@@ -75,6 +77,7 @@
             box-shadow: 0 0 30px var(--neon);
         }
 
+        /* --- ANIMOVANÉ LOGO --- */
         .header-logo {
             max-width: 450px;
             width: 90%;
@@ -88,6 +91,7 @@
             100% { filter: drop-shadow(0 0 25px var(--neon)); transform: scale(1.02); }
         }
 
+        /* --- BANKOVNÍ SYSTÉM --- */
         .bank-box {
             background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%);
             border: 1px solid rgba(0, 242, 255, 0.4);
@@ -100,77 +104,400 @@
             overflow: hidden;
         }
 
-        .bank-label { display: block; opacity: 0.5; font-size: 0.75em; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
-        .bank-main-val { font-size: 3.2em; font-weight: 900; text-shadow: 0 0 20px var(--neon); line-height: 1; margin-bottom: 15px; }
-        .bank-total-row { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; gap: 12px; }
-        .bank-total-label { font-size: 0.7em; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
-        .bank-total-val { font-weight: 800; color: var(--neon); font-size: 1.3em; }
+        .bank-label {
+            display: block;
+            opacity: 0.5;
+            font-size: 0.75em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
 
+        .bank-main-val {
+            font-size: 3.2em;
+            font-weight: 900;
+            text-shadow: 0 0 20px var(--neon);
+            line-height: 1;
+            margin-bottom: 15px;
+        }
+
+        .bank-total-row {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bank-total-label {
+            font-size: 0.7em;
+            opacity: 0.6;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .bank-total-val {
+            font-weight: 800;
+            color: var(--neon);
+            font-size: 1.3em;
+        }
+
+        /* --- NAVIGACE --- */
         .btn-stats {
-            display: inline-block; margin-bottom: 40px; padding: 16px 35px; background: rgba(0, 242, 255, 0.05);
-            border: 1px solid var(--neon); color: var(--neon); text-decoration: none; border-radius: 100px;
-            font-weight: 900; transition: var(--transition-slow); letter-spacing: 1.5px; text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 40px;
+            padding: 16px 35px;
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid var(--neon);
+            color: var(--neon);
+            text-decoration: none;
+            border-radius: 100px;
+            font-weight: 900;
+            transition: var(--transition-slow);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
 
-        .btn-stats:hover { background: var(--neon); color: var(--dark); box-shadow: 0 0 40px var(--neon); transform: translateY(-3px); }
+        .btn-stats:hover {
+            background: var(--neon);
+            color: var(--dark);
+            box-shadow: 0 0 40px var(--neon);
+            transform: translateY(-3px);
+        }
 
-        #matchList { width: 100%; max-width: 650px; padding-bottom: 120px; }
+        /* --- ZÁPASY - KARTY --- */
+        #matchList {
+            width: 100%;
+            max-width: 650px;
+            padding-bottom: 120px;
+        }
+
         .match-card {
-            background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow);
-            position: relative; backdrop-filter: blur(15px);
+            background: var(--card-bg);
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 35px;
+            padding: 30px;
+            cursor: pointer;
+            transition: var(--transition-slow);
+            position: relative;
+            backdrop-filter: blur(15px);
         }
 
-        .match-card:hover { border-color: var(--neon); background: rgba(255, 255, 255, 0.08); transform: scale(1.01); }
+        .match-card:hover {
+            border-color: var(--neon);
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.01);
+        }
 
-        .barometer-container { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 20px; margin: 25px 0 12px 0; display: flex; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        /* --- BAROMETR ROZLOŽENÍ --- */
+        .barometer-container {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin: 25px 0 12px 0;
+            display: flex;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
         .bar-1 { height: 100%; background: #38a169; transition: 1s ease-out; }
         .bar-0 { height: 100%; background: #718096; transition: 1s ease-out; }
         .bar-2 { height: 100%; background: #3182ce; transition: 1s ease-out; }
-        .bar-labels { display: flex; justify-content: space-between; font-size: 0.65em; opacity: 0.7; font-weight: 800; margin-bottom: 20px; letter-spacing: 0.5px; }
 
-        .flags-wrapper { display: flex; justify-content: center; align-items: center; gap: 25px; margin: 25px 0; }
-        .flag-container { perspective: 1000px; text-align: center; width: 130px; }
-        .flag-img { width: 110px; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); animation: flagWave 3s ease-in-out infinite; transform-origin: left center; border-left: 3px solid rgba(255,255,255,0.4); }
+        .bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65em;
+            opacity: 0.7;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
 
-        @keyframes flagWave { 0%, 100% { transform: rotateY(0deg) rotateX(0deg); } 50% { transform: rotateY(35deg) rotateX(10deg) scale(1.05); } }
+        /* --- 3D ANIMOVANÉ VLAJKY --- */
+        .flags-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin: 25px 0;
+        }
 
-        .vs-circle { background: var(--neon); color: var(--dark); border-radius: 50%; width: 50px; height: 50px; line-height: 50px; font-weight: 900; font-size: 1.1em; box-shadow: 0 0 20px var(--neon); z-index: 2; }
-        .timer-box { font-size: 0.9em; font-weight: 800; color: var(--neon); background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(0, 242, 255, 0.2); }
+        .flag-container {
+            perspective: 1000px;
+            text-align: center;
+            width: 130px;
+        }
 
-        .details { display: none; padding-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 30px; text-align: left; }
-        .input-group { margin-bottom: 25px; }
-        .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #ffffff; border-radius: 20px; font-size: 1.1em; box-sizing: border-box; outline: none; transition: var(--transition-fast); }
-        .input-field:focus { border-color: var(--neon); background: rgba(0,0,0,0.6); box-shadow: 0 0 15px rgba(0, 242, 255, 0.1); }
+        .flag-img {
+            width: 110px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            animation: flagWave 3s ease-in-out infinite;
+            transform-origin: left center;
+            border-left: 3px solid rgba(255,255,255,0.4);
+        }
 
-        .score-row { display: flex; justify-content: center; align-items: center; gap: 25px; margin: 25px 0; }
-        .score-input { width: 85px; height: 75px; text-align: center; font-weight: 900; font-size: 2.2em; background: #000000; border: 3px solid #334155; color: #ffffff; border-radius: 22px; outline: none; transition: var(--transition-fast); }
-        .score-input:focus { border-color: var(--neon); box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
+        @keyframes flagWave {
+            0%, 100% { transform: rotateY(0deg) rotateX(0deg); }
+            50% { transform: rotateY(35deg) rotateX(10deg) scale(1.05); }
+        }
 
-        .hide-tip-row { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 20px; margin-bottom: 30px; cursor: pointer; }
-        .btn-add-ticket { width: 100%; background: var(--neon); color: var(--dark); border: none; padding: 22px; border-radius: 20px; font-weight: 900; font-size: 1.1em; cursor: pointer; text-transform: uppercase; transition: var(--transition-fast); letter-spacing: 1px; }
-        .btn-add-ticket:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 242, 255, 0.3); }
+        .vs-circle {
+            background: var(--neon);
+            color: var(--dark);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            font-weight: 900;
+            font-size: 1.1em;
+            box-shadow: 0 0 20px var(--neon);
+            z-index: 2;
+        }
 
-        .fab-cart { position: fixed; bottom: 35px; right: 35px; width: 75px; height: 75px; background: var(--neon); color: var(--dark); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 2em; cursor: pointer; z-index: 5000; box-shadow: 0 15px 40px rgba(0, 242, 255, 0.4); animation: fabBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes fabBounce { from { transform: scale(0) rotate(-90deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
-        .fab-badge { position: absolute; top: -5px; right: -5px; background: #ff4444; color: white; width: 28px; height: 28px; border-radius: 50%; font-size: 0.45em; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 3px solid var(--dark); }
+        .timer-box {
+            font-size: 0.9em;
+            font-weight: 800;
+            color: var(--neon);
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 100px;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+        }
 
-        #cartModal { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 520px; background: #1e293b; border: 2px solid var(--neon); border-radius: 40px; padding: 35px; display: none; z-index: 9999; box-shadow: 0 0 100px rgba(0,0,0,0.9); max-height: 80vh; overflow-y: auto; }
-        .cart-item { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px 20px; margin-bottom: 12px; border-left: 5px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
-        .payment-details-box { background: rgba(0,0,0,0.5); border-radius: 25px; padding: 25px; margin-top: 25px; border: 1px solid rgba(0, 242, 255, 0.15); text-align: left; }
-        .pay-row { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .pay-key { font-size: 0.8em; opacity: 0.5; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
-        .pay-val { font-weight: 900; color: var(--neon); font-size: 1em; letter-spacing: 0.5px; }
+        /* --- DETAIL SÁZENÍ --- */
+        .details {
+            display: none;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            text-align: left;
+        }
 
-        .bet-row-ui { background: rgba(255,255,255,0.03); border-radius: 18px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--neon); display: flex; flex-direction: column; }
-        .bet-header-ui { display: flex; justify-content: space-between; font-weight: 900; font-size: 0.95em; margin-bottom: 5px; }
-        .bet-meta-ui { font-size: 0.85em; opacity: 0.6; }
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #ffffff;
+            border-radius: 20px;
+            font-size: 1.1em;
+            box-sizing: border-box;
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .input-field:focus {
+            border-color: var(--neon);
+            background: rgba(0,0,0,0.6);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .score-input {
+            width: 85px;
+            height: 75px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 2.2em;
+            background: #000000;
+            border: 3px solid #334155;
+            color: #ffffff;
+            border-radius: 22px;
+            outline: none;
+            transition: var(--transition-fast);
+        }
+
+        .score-input:focus {
+            border-color: var(--neon);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        .hide-tip-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        .btn-add-ticket {
+            width: 100%;
+            background: var(--neon);
+            color: var(--dark);
+            border: none;
+            padding: 22px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: var(--transition-fast);
+            letter-spacing: 1px;
+        }
+
+        .btn-add-ticket:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 242, 255, 0.3);
+        }
+
+        /* --- PLOVOUCÍ TLAČÍTKO (FAB) --- */
+        .fab-cart {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 75px;
+            height: 75px;
+            background: var(--neon);
+            color: var(--dark);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            z-index: 5000;
+            box-shadow: 0 15px 40px rgba(0, 242, 255, 0.4);
+            animation: fabBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fabBounce {
+            from { transform: scale(0) rotate(-90deg); opacity: 0; }
+            to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .fab-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4444;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 0.45em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            border: 3px solid var(--dark);
+        }
+
+        /* --- MODÁL TIKETU --- */
+        #cartModal {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 94%;
+            max-width: 520px;
+            background: #1e293b;
+            border: 2px solid var(--neon);
+            border-radius: 40px;
+            padding: 35px;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-left: 5px solid var(--neon);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- PLATEBNÍ BOX PO ODESLÁNÍ --- */
+        .payment-details-box {
+            background: rgba(0,0,0,0.5);
+            border-radius: 25px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            text-align: left;
+        }
+
+        .pay-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .pay-row:last-child { border: none; margin: 0; padding: 0; }
+
+        .pay-key {
+            font-size: 0.8em;
+            opacity: 0.5;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .pay-val {
+            font-weight: 900;
+            color: var(--neon);
+            font-size: 1em;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- SEZNAM SÁZEK NA KARTĚ --- */
+        .bet-row-ui {
+            background: rgba(255,255,255,0.03);
+            border-radius: 18px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--neon);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bet-header-ui {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .bet-meta-ui {
+            font-size: 0.85em;
+            opacity: 0.6;
+        }
 
         .win-glow { color: #f1c40f; text-shadow: 0 0 10px rgba(241,196,15,0.5); font-weight: 900; }
         .ok-glow { color: #27ae60; font-weight: 900; }
         .striker-hit { color: #3182ce; font-weight: 800; margin-left: 5px; }
         .loss-dim { color: #ff4444; opacity: 0.5; }
 
+        /* SCROLLBAR */
         #cartModal::-webkit-scrollbar { width: 6px; }
         #cartModal::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
     </style>
@@ -216,19 +543,35 @@
 
         <div id="cartViewPost" style="display:none; text-align:center;">
             <div style="font-weight:900; color:var(--neon); font-size:1.6em; margin-bottom:25px;">✅ TIKET BYL PŘIJAT!</div>
+            
             <img id="uiQrImage" src="" style="width:240px; background:white; padding:12px; border-radius:25px; box-shadow: 0 0 40px rgba(0,0,0,0.5);">
+            
             <div id="payBtnPlaceholder"></div>
+
             <div class="payment-details-box">
-                <div class="pay-row"> <span class="pay-key">Číslo účtu:</span> <span class="pay-val">295511827 / 0300</span> </div>
-                <div class="pay-row"> <span class="pay-key">Částka:</span> <span class="pay-val" id="uiPayAmount">0 Kč</span> </div>
-                <div class="pay-row"> <span class="pay-key">Zpráva:</span> <span class="pay-val" id="uiPayMessage">---</span> </div>
+                <div class="pay-row">
+                    <span class="pay-key">Číslo účtu:</span>
+                    <span class="pay-val">295511827 / 0300</span>
+                </div>
+                <div class="pay-row">
+                    <span class="pay-key">Částka:</span>
+                    <span class="pay-val" id="uiPayAmount">0 Kč</span>
+                </div>
+                <div class="pay-row">
+                    <span class="pay-key">Zpráva pro příjemce:</span>
+                    <span class="pay-val" id="uiPayMessage">---</span>
+                </div>
             </div>
+
+            <p style="font-size:0.85em; opacity:0.5; margin-top:20px; line-height:1.5;">
+                Platbu proveďte obratem. Vaše sázky budou <br>aktivovány po připsání peněz.
+            </p>
+            
             <button class="btn-add-ticket" style="margin-top:15px;" onclick="uiCloseCart()">ZAVŘÍT TIKET</button>
         </div>
     </div>
 
 <script>
-    // TVÁ FIREBASE KONFIGURACE (NEZMĚNĚNA)
     const firebaseConfig = { 
         apiKey: "AIzaSyC-NCdmsgA42FxnopKm92m1y5gUGw_z_uE", 
         authDomain: "nadeje-208bd.firebaseapp.com", 
@@ -244,7 +587,6 @@
     let localCart = {};
     let activeDeadlines = {};
 
-    // TVÁ ORIGINÁLNÍ LOGIKA NAČÍTÁNÍ ZÁPASŮ
     db.ref('sazkyData').on('value', snap => {
         const data = snap.val() || {};
         const container = document.getElementById('matchList');
@@ -273,12 +615,7 @@
             const isEvaluated = m.status === "vyhodnoceno";
 
             let t1=0, t0=0, t2=0, tot=0;
-            if(m.sazky) Object.values(m.sazky).forEach(s => { 
-                const parts = s.skore.split(':'); 
-                if(parseInt(parts[0]) > parseInt(parts[1])) t1++; 
-                else if(parseInt(parts[0]) === parseInt(parts[1])) t0++; 
-                else t2++; tot++; 
-            });
+            if(m.sazky) Object.values(m.sazky).forEach(s => { const parts = s.skore.split(':'); if(parseInt(parts[0]) > parseInt(parts[1])) t1++; else if(parseInt(parts[0]) === parseInt(parts[1])) t0++; else t2++; tot++; });
             const p1 = tot ? (t1/tot)*100 : 33.3, p0 = tot ? (t0/tot)*100 : 33.3, p2 = tot ? (t2/tot)*100 : 33.3;
 
             let matchStrelci = [];
@@ -300,14 +637,12 @@
                     const reveal = isClosed || isEvaluated;
                     let icon = "⏳";
                     let strikerHitLabel = "";
-                    
                     if(isEvaluated) {
                         const sParts = s.skore.split(':');
                         const rParts = m.vysledek.split(':');
                         const hitScore = (parseInt(sParts[0]) === parseInt(rParts[0])) && (parseInt(sParts[1]) === parseInt(rParts[1]));
                         const playerStriker = s.strelec.toLowerCase().trim();
                         const hitStriker = matchStrelci.some(r => r.includes(playerStriker) || playerStriker.includes(r));
-
                         if(s.stav === "🏆") icon = `<span class="win-glow">🏆 VÝHRA: ${s.vyhraKc || 0} Kč</span>`;
                         else if(s.stav === "✅" || hitScore) icon = `<span class="ok-glow">✅ trefil skóre</span>`;
                         else icon = `<span class="loss-dim">❌</span>`;
@@ -321,7 +656,6 @@
         });
     });
 
-    // POMOCNÉ FUNKCE (TÉŽ PŮVODNÍ)
     function uiToggleMatch(id) { const el = document.getElementById(`detail-${id}`); document.querySelectorAll('.details').forEach(d => { if(d.id !== `detail-${id}`) d.style.display = 'none'; }); el.style.display = (el.style.display === 'block') ? 'none' : 'block'; }
     function uiUpdateFAB() { const count = Object.keys(localCart).length; const fab = document.getElementById('fabCart'); const badge = document.getElementById('fabBadge'); if(count > 0) { fab.style.display = 'flex'; badge.innerText = count; } else { fab.style.display = 'none'; } }
     function uiOpenCart() { const list = document.getElementById('cartItemsContainer'); list.innerHTML = ""; let sum = 0; Object.entries(localCart).forEach(([id, data]) => { sum += 20; list.innerHTML += `<div class="cart-item"><div><div style="font-size:0.7em; opacity:0.5; font-weight:800;">${data.matchName}</div><div style="font-weight:900; font-size:1.1em;">${data.jmeno} | <span style="color:var(--neon)">${data.skore}</span></div></div><div style="color:#ff4444; font-size:1.8em; font-weight:900; cursor:pointer; padding-left:15px;" onclick="actionRemoveFromCart('${id}')">×</div></div>`; }); document.getElementById('uiCartTotal').innerText = `${sum} Kč`; document.getElementById('cartViewPre').style.display = 'block'; document.getElementById('cartViewPost').style.display = 'none'; document.getElementById('cartModal').style.display = 'block'; }
@@ -330,10 +664,14 @@
     function actionAddToTicket(id, mName) { 
         const name = document.getElementById(`name-${id}`).value, sD = document.getElementById(`scD-${id}`).value, sH = document.getElementById(`scH-${id}`).value, striker = document.getElementById(`striker-${id}`).value, isHidden = document.getElementById(`hide-${id}`).checked; 
         if(!name || sD==="" || sH==="" || !striker) return alert("Vyplň prosím všechna pole sázky!"); 
-        localCart[id] = { jmeno: name, skore: `${sD}:${sH}`, strelec: striker, skryt: isHidden, matchName: mName }; 
-        uiUpdateFAB(); uiToggleMatch(id); 
+        db.ref(`sazkyData/zapasy/${id}/sazky`).once('value', snap => { 
+            const data = snap.val() || {}; 
+            const isDup = Object.values(data).some(s => s.skore === `${sD}:${sH}` && s.strelec.toLowerCase().trim() === striker.toLowerCase().trim()); 
+            if(isDup) { const potvrdit = confirm("POZOR: Tento přesný tip už existuje. Chceš přesto vsadit?"); if(!potvrdit) return; }
+            localCart[id] = { jmeno: name, skore: `${sD}:${sH}`, strelec: striker, skryt: isHidden, matchName: mName }; 
+            uiUpdateFAB(); uiToggleMatch(id); 
+        }); 
     }
-
     function actionRemoveFromCart(id) { delete localCart[id]; uiUpdateFAB(); if(Object.keys(localCart).length === 0) uiCloseCart(); else uiOpenCart(); }
     
     function actionSendTicket() { 
@@ -347,7 +685,9 @@
         document.getElementById('uiQrImage').src = `https://api.paylibo.com/paylibo/generator/czech/image?accountNumber=295511827&bankCode=0300&amount=${totalSum}&currency=CZK&message=${msg}`; 
         const paylink = `spayid://1.1?acc=295511827*0300&am=${totalSum}&cc=CZK&msg=${msg}`;
         const placeholder = document.getElementById('payBtnPlaceholder');
-        placeholder.innerHTML = `<a href="${paylink}" style="display:block; background:#ffffff; color:#000000; padding:18px; border-radius:20px; text-decoration:none; font-weight:900; margin:20px 0; font-size:0.9em; box-shadow: 0 0 25px rgba(255,255,255,0.3);">📱 OTEVŘÍT BANKOVNÍ APLIKACI</a>`;
+        placeholder.innerHTML = ""; 
+        const btn = document.createElement('a'); btn.href = paylink; btn.innerHTML = "📱 OTEVŘÍT BANKOVNÍ APLIKACI"; btn.style = "display:block; background:#ffffff; color:#000000; padding:18px; border-radius:20px; text-decoration:none; font-weight:900; margin:20px 0; font-size:0.9em; box-shadow: 0 0 25px rgba(255,255,255,0.3);";
+        placeholder.appendChild(btn);
         document.getElementById('uiPayAmount').innerText = `${totalSum} Kč`; 
         document.getElementById('uiPayMessage').innerText = msg; 
         document.getElementById('cartViewPre').style.display = 'none'; 
@@ -355,15 +695,7 @@
         localCart = {}; uiUpdateFAB(); 
     }
     
-    setInterval(() => { 
-        const now = Date.now(); 
-        Object.entries(activeDeadlines).forEach(([id, dl]) => { 
-            const el = document.getElementById(`timer-${id}`); if(!el) return; 
-            const target = new Date(dl).getTime(), diff = target - now; 
-            if(diff <= 0) { el.innerText = "🔐 UZAVŘENO"; el.style.color = "#ff4444"; el.style.borderColor = "#ff4444"; } 
-            else { const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000); el.innerText = `⏱️ ${h}h ${m}m ${s}s`; } 
-        }); 
-    }, 1000);
+    setInterval(() => { const now = Date.now(); Object.entries(activeDeadlines).forEach(([id, dl]) => { const el = document.getElementById(`timer-${id}`); if(!el) return; const target = new Date(dl).getTime(), diff = target - now; if(diff <= 0) { el.innerText = "🔐 UZAVŘENO"; el.style.color = "#ff4444"; el.style.borderColor = "#ff4444"; } else { const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000); el.innerText = `⏱️ ${h}h ${m}m ${s}s`; } }); }, 1000);
 </script>
 
 <script src="js/notifications.js"></script>
