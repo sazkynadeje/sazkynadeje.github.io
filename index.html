@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v5.0</title>
+    <title>KANCELÁŘ NADĚJE v5.1</title>
 
     <meta name="apple-mobile-web-app-title" content="Naděje v2">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -42,25 +42,23 @@
         
         body { background-color: var(--dark); color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
         
-        /* Navigace */
-        .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -20px auto 30px auto; justify-content: center; }
-        .nav-btn { flex: 1; padding: 15px 5px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; text-decoration: none; color: #fff; font-size: 0.7em; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-fast); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
-        .nav-btn:hover { border-color: var(--neon); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,242,255,0.1); }
-        .nav-btn.active { border-color: var(--neon); background: rgba(0, 242, 255, 0.05); }
-
         .admin-lock { position: fixed; top: 20px; right: 20px; width: 48px; height: 48px; background: rgba(15, 23, 42, 0.9); border: 2px solid var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.3em; z-index: 9999; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); backdrop-filter: blur(10px); }
         .header-logo { max-width: 450px; width: 90%; margin: 20px 0 40px 0; filter: drop-shadow(0 0 10px var(--neon)); animation: neonGlow 4s ease-in-out infinite alternate; }
         
         @keyframes neonGlow { 0% { filter: drop-shadow(0 0 5px var(--neon)); transform: scale(1); } 100% { filter: drop-shadow(0 0 25px var(--neon)); transform: scale(1.02); } }
         
-        .bank-box { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 30px; padding: 30px; min-width: 300px; margin-bottom: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
-        .bank-main-val { font-size: 3.2em; font-weight: 900; text-shadow: 0 0 20px var(--neon); }
-        
+        /* NOVÝ BANK BOX SYSTÉM */
+        .bank-container { width: 100%; max-width: 450px; margin-bottom: 40px; }
+        .bank-box { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 35px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .bank-main-val { font-size: 2.8em; font-weight: 900; color: #fff; margin-bottom: 5px; }
+        .bank-nadeje-box { background: rgba(0, 242, 255, 0.1); border: 2px solid var(--neon); border-radius: 25px; padding: 20px; margin-top: 15px; position: relative; overflow: hidden; }
+        .bank-nadeje-val { font-size: 3.2em; font-weight: 900; text-shadow: 0 0 20px var(--neon); color: #fff; }
+
+        .nav-container { display: flex; gap: 12px; width: 90%; max-width: 450px; margin: -20px auto 30px auto; justify-content: center; }
+        .nav-btn { flex: 1; padding: 15px 5px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; text-decoration: none; color: #fff; font-size: 0.7em; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-fast); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+        .nav-btn:hover { border-color: var(--neon); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,242,255,0.1); }
+
         .match-card { background: var(--card-bg); border-radius: 35px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 35px; padding: 30px; cursor: pointer; transition: var(--transition-slow); position: relative; backdrop-filter: blur(15px); width: 90%; max-width: 450px; }
-        .flags-wrapper { display: flex; justify-content: center; align-items: center; gap: 25px; margin: 25px 0; }
-        .flag-img { width: 110px; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); animation: flagWave 3s ease-in-out infinite; transform-origin: left center; }
-        @keyframes flagWave { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(35deg) scale(1.05); } }
-        
         .vs-circle { background: var(--neon); color: var(--dark); border-radius: 50%; width: 50px; height: 50px; line-height: 50px; font-weight: 900; }
         .score-input { width: 85px; height: 75px; text-align: center; font-weight: 900; font-size: 2.2em; background: #000; border: 3px solid #334155; color: #fff; border-radius: 22px; }
         .input-field { width: 100%; padding: 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; }
@@ -84,17 +82,26 @@
     <a href="admin.html" class="admin-lock">⚙️</a>
     <img src="IMG_8429.png" class="header-logo" alt="LOGO">
 
-    <div class="bank-box">
-        <span class="bank-label">Maximální výhra pro dnešek</span>
-        <div class="bank-main-val"><span id="uiMainBank">0</span> Kč</div>
-        <div id="userWelcome" style="margin-top:15px; color:var(--neon); font-weight:bold; letter-spacing:1px;"></div>
+    <div class="bank-container">
+        <div class="bank-box">
+            <span style="font-size:0.7em; opacity:0.6; text-transform:uppercase; letter-spacing:1px;">Maximální výhra dnes</span>
+            <div class="bank-main-val"><span id="uiMainBank">0</span> Kč</div>
+            
+            <div class="bank-nadeje-box">
+                <span style="color:var(--neon); font-size:0.8em; font-weight:900; text-transform:uppercase; letter-spacing:2px;">Bank Naděje 2026</span>
+                <div class="bank-nadeje-val"><span id="uiBankNadeje">0</span><small style="font-size:0.4em; margin-left:5px;">Kč</small></div>
+                <div style="font-size:0.6em; opacity:0.6; margin-top:5px;">HLAVNÍ CENA PRO VÍTĚZE ŽEBŘÍČKU</div>
+            </div>
+            
+            <div id="userWelcome" style="margin-top:20px; color:var(--neon); font-weight:bold; letter-spacing:1px;"></div>
+        </div>
     </div>
 
     <div class="nav-container">
         <a href="statistiky.html" class="nav-btn">
             <span style="font-size:1.5em;">📊</span>ŽEBŘÍČEK
         </a>
-        <a href="profil.html" class="nav-btn active">
+        <a href="profil.html" class="nav-btn">
             <span style="font-size:1.5em;">👤</span>MŮJ PROFIL
         </a>
     </div>
@@ -130,17 +137,33 @@
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('loginBtn').onclick = () => {
                 const name = document.getElementById('loginName').value.trim();
-                if (name) {
-                    AuthService.setUser(name);
-                    location.reload();
-                }
+                if (name) { AuthService.setUser(name); location.reload(); }
             };
         } else {
             document.getElementById('userWelcome').innerText = `HRÁČ: ${user.name.toUpperCase()}`;
         }
 
-        DBService.getBank(val => document.getElementById('uiMainBank').innerText = val);
+        // --- NAČÍTÁNÍ BANKŮ (Nadeje Logic) ---
+        firebase.database().ref('sazkyData_v2').on('value', snap => {
+            const data = snap.val() || {};
+            const prevedeno = parseInt(data.prevedenyBank) || 0;
+            const bankNadeje = parseInt(data.bankNadeje) || 0;
+            
+            // Výpočet aktuálního banku (Převedeno + sázky aktivních zápasů * 15)
+            let extraToday = 0;
+            if (data.zapasy) {
+                Object.values(data.zapasy).forEach(m => {
+                    if (m.status === "aktivni" && m.sazky) {
+                        extraToday += (Object.keys(m.sazky).length * 15);
+                    }
+                });
+            }
 
+            document.getElementById('uiMainBank').innerText = (prevedeno + extraToday).toLocaleString();
+            document.getElementById('uiBankNadeje').innerText = bankNadeje.toLocaleString();
+        });
+
+        // --- ZBYTEK LOGIKY ZÁPASŮ ---
         DBService.getMatches(zapasy => {
             const container = document.getElementById('matchList');
             container.innerHTML = "";
@@ -150,8 +173,7 @@
                 activeDeadlines[id] = m.deadline;
                 const isEvaluated = m.status === "vyhodnoceno";
                 const now = Date.now();
-                const target = new Date(m.deadline).getTime();
-                const isClosed = now > target;
+                const isClosed = now > new Date(m.deadline).getTime();
 
                 const card = document.createElement('div');
                 card.className = "match-card";
@@ -159,7 +181,7 @@
                 
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-                        <div style="color:var(--neon); font-size:0.75em; font-weight:900;">MATCH ID: ${id.substring(0,5)}</div>
+                        <div style="color:var(--neon); font-size:0.75em; font-weight:900;">ID: ${id.substring(0,5)}</div>
                         ${isEvaluated ? `<div style="background:#27ae60; padding:5px 15px; border-radius:100px; font-size:0.8em;">VÝSLEDEK ${m.vysledek}</div>` : `<div id="timer-${id}" class="timer-box" style="color:var(--neon); font-weight:bold;">--:--:--</div>`}
                     </div>
                     <div class="flags-wrapper">
@@ -169,12 +191,12 @@
                     </div>
                     <div id="detail-${id}" class="details" style="display:none; margin-top:25px; padding-top:25px; border-top:1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation()">
                         ${(!isClosed && !isEvaluated) ? `
-                            <div class="score-row">
+                            <div style="display:flex; justify-content:center; gap:15px; margin-bottom:20px;">
                                 <input type="number" id="scD-${id}" class="score-input" placeholder="0">
                                 <span style="font-size:2.5em; font-weight:900; color:var(--neon)">:</span>
                                 <input type="number" id="scH-${id}" class="score-input" placeholder="0">
                             </div>
-                            <input type="text" id="striker-${id}" class="input-field" placeholder="Kdo dá gól? (příjmení)">
+                            <input type="text" id="striker-${id}" class="input-field" placeholder="Příjmení střelce">
                             <button class="btn-add-ticket" onclick="actionAddToTicket('${id}', '${m.domaci} vs ${m.hoste}')">PŘIDAT NA TIKET (20 Kč)</button>
                         ` : `<div style="color:var(--neon); font-weight:900;">SÁZKY UZAVŘENY</div>`}
                         <div id="bets-list-${id}" style="margin-top:20px;"></div>
@@ -187,7 +209,7 @@
                     Object.values(m.sazky).forEach(s => {
                         bList.innerHTML += `<div style="background:rgba(255,255,255,0.03); margin-bottom:5px; padding:10px; border-radius:10px; display:flex; justify-content:space-between; font-size:0.9em;">
                             <span>${s.stav || '⏳'} ${s.jmeno}</span>
-                            <span style="color:var(--neon); font-weight:bold;">${s.skore || s.tip}</span>
+                            <span style="color:var(--neon); font-weight:bold;">${s.tip}</span>
                         </div>`;
                     });
                 }
@@ -207,7 +229,6 @@
             localCart[id] = { tip: `${sD}:${sH}`, strelec: str, matchName: mName };
             document.getElementById('fabCart').style.display = 'flex';
             document.getElementById('fabBadge').innerText = Object.keys(localCart).length;
-            alert("Přidáno na tiket.");
         };
 
         window.uiOpenCart = () => {
@@ -229,11 +250,7 @@
 
         window.actionSendTicket = async () => {
             if (confirm("Odeslat sázky?")) {
-                try {
-                    await DBService.sendTicket(localCart);
-                    alert("Tiket úspěšně odeslán!");
-                    location.reload();
-                } catch (e) { alert(e.message); }
+                try { await DBService.sendTicket(localCart); alert("Tiket odeslán!"); location.reload(); } catch (e) { alert(e.message); }
             }
         };
 
