@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANCELÁŘ NADĚJE v2.0</title>
+    <title>SÁZKOVKA NADĚJE v2.0</title>
 
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,23 +21,21 @@
         }(window,document, 'script', 'webpushr-jssdk'));
 
         webpushr('setup', {
-            'key': 'BIR6EdOsgrpmVfDa5qZDlfd4JQdtE_oXRpTngQXT5Bwqq3tF0k_glS9fUKinuJs3djCcxd7KxLTlM2rG-E6mGlo',
-            'auto_prompt': false, 
-            'sw': '/SazkovkaNadeje/webpushr-sw.js',
-            'scope': '/SazkovkaNadeje/'
+            'key': 'BAxBwXCacLqMoyihibIMbRI7cZ9HyPD_wd5JRpPBc3MXk9VEezuI_vVR2rfNLuTJ-2-gsnY48LYSToWdz9bTClc',
+            'auto_prompt': false
         });
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --neon: #00f2ff; --dark: #0f172a; }
+        :root { --neon: #00f2ff; --dark: #0f172a; --card-bg: rgba(255, 255, 255, 0.05); }
         body { background-color: var(--dark); color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; text-align: center; }
         .header-logo { max-width: 450px; width: 90%; margin: 20px 0; filter: drop-shadow(0 0 10px var(--neon)); }
         .bank-box { background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,242,255,0.08) 100%); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 30px; padding: 25px; margin-bottom: 30px; }
         .bank-main-val { font-size: 2.8em; font-weight: 900; text-shadow: 0 0 20px var(--neon); }
         #matchList { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
-        .match-card { background: rgba(255, 255, 255, 0.05); border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 25px; padding: 25px; }
+        .match-card { background: var(--card-bg); border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 25px; padding: 25px; }
         .flags-wrapper { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0; }
         .flag-img { width: 90px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .vs-circle { background: var(--neon); color: var(--dark); border-radius: 50%; width: 40px; height: 40px; line-height: 40px; font-weight: 900; }
@@ -61,11 +59,10 @@
         </div>
     </div>
 
-    <a href="admin.html" style="position:fixed; top:20px; right:20px; text-decoration:none; z-index:9999;">⚙️</a>
-
     <img src="IMG_8429.png" class="header-logo" alt="LOGO">
 
     <div class="bank-box">
+        <span style="opacity:0.5; font-size:0.7em; letter-spacing:2px; text-transform:uppercase;">Aktuální Bank</span>
         <div class="bank-main-val"><span id="uiMainBank">0</span> Kč</div>
         <div id="userWelcome" style="margin-top:10px; color:var(--neon); font-weight:bold;"></div>
     </div>
@@ -82,6 +79,7 @@
 
         let cart = {};
 
+        // Login logika
         let user = AuthService.getUser();
         if (!user) {
             document.getElementById('loginOverlay').style.display = 'flex';
@@ -97,8 +95,10 @@
             document.getElementById('userWelcome').innerText = `Hráč: ${user.name}`;
         }
 
+        // Banka
         DBService.getBank(val => document.getElementById('uiMainBank').innerText = val);
         
+        // Načtení zápasů
         DBService.getMatches(zapasy => {
             const container = document.getElementById('matchList');
             container.innerHTML = "";
@@ -125,8 +125,8 @@
                             <span style="font-size:2em; color:var(--neon)">:</span>
                             <input type="number" id="scH-${id}" class="score-input" placeholder="0">
                         </div>
-                        <input type="text" id="striker-${id}" class="input-field" placeholder="Kdo dá gól?">
-                        <button class="btn-add-ticket" id="add-btn-${id}">VSADIT (20 Kč)</button>
+                        <input type="text" id="striker-${id}" class="input-field" placeholder="Střelec gólu">
+                        <button class="btn-add-ticket" id="add-btn-${id}">PŘIDAT NA TIKET (20 Kč)</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -135,7 +135,7 @@
                     const sD = document.getElementById(`scD-${id}`).value;
                     const sH = document.getElementById(`scH-${id}`).value;
                     const str = document.getElementById(`striker-${id}`).value;
-                    if(sD === "" || sH === "" || !str) return alert("Musíš vyplnit vše!");
+                    if(sD === "" || sH === "" || !str) return alert("Vyplň vše!");
                     cart[id] = { tip: `${sD}:${sH}`, strelec: str };
                     document.getElementById('fabCart').style.display = 'flex';
                     document.getElementById('fabBadge').innerText = Object.keys(cart).length;
@@ -144,8 +144,9 @@
             });
         });
 
+        // Odeslání tiketu
         document.getElementById('fabCart').onclick = async () => {
-            if (confirm("Chceš odeslat tiket?")) {
+            if (confirm("Odeslat tiket?")) {
                 await DBService.sendTicket(cart);
                 alert("Tiket odeslán!");
                 location.reload();
