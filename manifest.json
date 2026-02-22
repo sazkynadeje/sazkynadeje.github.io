@@ -1,0 +1,25 @@
+{
+  "short_name": "Naděje v2",
+  "name": "Kancelář Naděje v2.0",
+  "description": "Sázková kancelář pro opravdové znalce.",
+  "icons": [
+    {
+      "src": "IMG_8429.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "IMG_8429.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "scope": "./"
+}
